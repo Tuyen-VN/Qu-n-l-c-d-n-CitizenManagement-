@@ -84,14 +84,14 @@ const ViewDetailHousehold = (props) => {
     // e.g., call a parent-provided fetch function if available
     // fetchHousehold?.();
     // or fetchMembers?.();
-    message.success("Household members refreshed");
+    message.success("Đã cập nhật danh sách thành viên");
   };
   const onDeleteMember = (memberId) => {
     Modal.confirm({
-      title: "Remove this member?",
-      content: "This action cannot be undone.",
-      okText: "Remove",
-      cancelText: "Cancel",
+      title: "Xóa thành viên này?",
+      content: "Hành động này không thể hoàn tác.",
+      okText: "Xóa",
+      cancelText: "Hủy",
       okButtonProps: { danger: true },
       async onOk() {
         try {
@@ -102,25 +102,25 @@ const ViewDetailHousehold = (props) => {
           console.log(dataHousehold?.household_id, memberId);
           if (res && (res.success === true || res.status === 200)) {
             notification.success({
-              message: "Member removed",
-              description: "The member was removed successfully.",
+              message: "Xóa thành viên",
+              description: "Thành viên đã được xóa thành công.",
             });
             // refresh list if provided            handleMemberAdded?.();
           } else {
             const errMsg =
-              res?.error?.message || res?.message || "Failed to remove member.";
+              res?.error?.message || res?.message || "Không thể xóa thành viên.";
             notification.error({
-              message: "Remove failed",
+              message: "Xóa thất bại",
               description: String(errMsg),
             });
           }
         } catch (error) {
           notification.error({
-            message: "Remove error",
+            message: "Lỗi khi xóa thành viên",
             description:
               error?.response?.data?.message ||
               +error?.message ||
-              "An unexpected error occurred.",
+              "Đã xảy ra lỗi không mong muốn.",
           });
         }
       },
@@ -135,14 +135,14 @@ const ViewDetailHousehold = (props) => {
           <div className="vd-header">
             <div className="vd-header__left">
               <Button type="text" icon={<LeftOutlined />} onClick={onBack}>
-                Back
+                Quay lại
               </Button>
               <div className="vd-header__title">
                 <Title level={2} className="vd-h1">
-                  Household Details
+                 Chi tiết hộ khẩu
                 </Title>
                 <p className="vd-subtitle">
-                  View and manage household information
+                  Xem và quản lý thông tin chi tiết hộ gia đình
                 </p>
               </div>
             </div>
@@ -154,7 +154,7 @@ const ViewDetailHousehold = (props) => {
                 icon={<DeleteOutlined />}
                 onClick={onDelete}
               >
-                Delete
+                Xóa hộ khẩu
               </Button>
             </div>
           </div>
@@ -165,9 +165,9 @@ const ViewDetailHousehold = (props) => {
           <Card className="vd-card">
             <div className="vd-card__header">
               <div>
-                <h2 className="vd-h2">Household Information</h2>
+                <h2 className="vd-h2">Thông tin hộ khẩu</h2>
                 <p className="vd-subtitle">
-                  Basic details about this household
+                  Các thông tin cơ bản của hộ gia đình
                 </p>
               </div>
             </div>
@@ -180,33 +180,33 @@ const ViewDetailHousehold = (props) => {
               items={[
                 {
                   key: "number",
-                  label: "Household Code",
+                  label: "Mã hộ khẩu",
                   children: household.number,
                 },
                 {
                   key: "address",
                   label: (
                     <Space size={6}>
-                      <EnvironmentOutlined /> Address
+                      <EnvironmentOutlined /> Địa chỉ
                     </Space>
                   ),
                   children: household.address,
                 },
                 {
                   key: "head",
-                  label: "Head of Household",
+                  label: "Chủ hộ",
                   children: household.headOfHousehold,
                 },
                 {
                   key: "location",
-                  label: "Location",
+                  label: "Khu vực",
                   children: <Tag color="blue">{household.locationName}</Tag>,
                 },
                 {
                   key: "members",
                   label: (
                     <Space size={6}>
-                      <TeamOutlined /> Total Members
+                      <TeamOutlined /> Tổng số thành viên
                     </Space>
                   ),
                   children: household.totalMembers,
@@ -215,7 +215,7 @@ const ViewDetailHousehold = (props) => {
                   key: "regDate",
                   label: (
                     <Space size={6}>
-                      <CalendarOutlined /> Registration Date
+                      <CalendarOutlined /> Ngày đăng ký
                     </Space>
                   ),
                   children: registrationStr,
@@ -224,7 +224,7 @@ const ViewDetailHousehold = (props) => {
                   key: "created",
                   label: (
                     <Space size={6}>
-                      <CalendarOutlined /> Created At
+                      <CalendarOutlined /> Ngày tạo hệ thống
                     </Space>
                   ),
                   children: createdStr,
@@ -237,22 +237,22 @@ const ViewDetailHousehold = (props) => {
           <Card className="vd-card">
             <div className="vd-card__header vd-card__header--with-btn">
               <div>
-                <h2 className="vd-h2">Household Members</h2>
-                <p className="vd-subtitle">Manage members of this household</p>
+                <h2 className="vd-h2">Thành viên hộ khẩu</h2>
+                <p className="vd-subtitle">Quản lý thành viên của hộ này</p>
               </div>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={onAddMember}
               >
-                Add Member
+                Thêm thành viên
               </Button>
             </div>
 
             <div className="vd-members">
               <List
                 dataSource={dataHouseholdMembers}
-                locale={{ emptyText: "No members" }}
+                locale={{ emptyText: "Chưa có thành viên" }}
                 renderItem={(m) => {
                   const name = m.full_name ?? m.name ?? "—";
                   const role =
@@ -300,7 +300,7 @@ const ViewDetailHousehold = (props) => {
                                 type="secondary"
                                 className="vd-detail__label"
                               >
-                                Citizen Code: <span> </span>
+                                Số định danh: <span> </span>
                               </Text>
                               <Text className="vd-detail__value">
                                 {idNumber}
@@ -311,7 +311,7 @@ const ViewDetailHousehold = (props) => {
                                 type="secondary"
                                 className="vd-detail__label"
                               >
-                                Date of Birth: <span> </span>
+                                Ngày sinh: <span> </span>
                               </Text>
                               <Text className="vd-detail__value">{dob}</Text>
                             </div>
@@ -320,7 +320,7 @@ const ViewDetailHousehold = (props) => {
                                 type="secondary"
                                 className="vd-detail__label"
                               >
-                                Gender: <span> </span>
+                                Giới tính: <span> </span>
                               </Text>
                               <Text className="vd-detail__value">{gender}</Text>
                             </div>

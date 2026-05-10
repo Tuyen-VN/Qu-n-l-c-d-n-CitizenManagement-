@@ -109,15 +109,32 @@ $bg-page: #f5f5f5;
     background: #fafafa;
     color: $text-strong;
     font-weight: 600;
-    padding: 16px 24px;
+    padding: 10px 16px;
     border-bottom: 1px solid #f0f0f0;
   }
 
   .ant-table-tbody > tr > td {
-    padding: 20px 24px;
+    padding: 8px 16px;
     font-size: 14px;
     color: #333;
     border-bottom: 1px solid #f5f5f5;
+  }
+  
+  .ant-table-body::-webkit-scrollbar {
+    height: 8px;
+    }
+    .ant-table-body::-webkit-scrollbar-thumb {
+      background: #d9d9d9;
+      border-radius: 10px;
+      &:hover {
+        background: #bfbfbf;
+      }
+    }
+  }
+
+  // Cải thiện phần thanh tìm kiếm để không chiếm quá nhiều diện tích
+  .search-container {
+    padding: 0 24px 12px; // Giảm padding bottom
   }
 
   .ant-table-tbody > tr:hover > td {
@@ -129,7 +146,7 @@ $bg-page: #f5f5f5;
       "Liberation Mono", "Courier New", monospace;
     color: #666;
   }
-}
+
 
 .household-container {
   .ant-tag {

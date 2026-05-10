@@ -19,6 +19,7 @@ import HouseholdDetail from "./components/Admin/Household/HouseholdDetail";
 import HouseholdList from "./components/Admin/Household/HouseholdList";
 import UserProfile from "./components/User/UserProfile";
 import ResidenceTable from "./components/Admin/Residence/ResidenceTable";
+import CertificateTable from "./components/Admin/Certificate/CertificateTable";
 const Layout = () => {
   return (
     <>
@@ -73,7 +74,7 @@ const routes = [
         ],
       },
       { path: "residence", element: <ResidenceTable /> },
-      { path: "certificates", element: <div>certificates</div> },
+      { path: "certificates", element: <CertificateTable /> },
       { path: "reports", element: <div>reports</div> },
     ],
   },

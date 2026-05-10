@@ -170,9 +170,9 @@ const CitizenModalCreate = (props) => {
                 <Select
                   placeholder="Chọn giới tính"
                   options={[
-                    { label: "Male", value: "Male" },
-                    { label: "Female", value: "Female" },
-                    { label: "Other", value: "Other" },
+                    { label: "Nam", value: "Male" },
+                    { label: "Nữ", value: "Female" },
+                    { label: "Khác", value: "Other" },
                   ]}
                 />
               </Form.Item>

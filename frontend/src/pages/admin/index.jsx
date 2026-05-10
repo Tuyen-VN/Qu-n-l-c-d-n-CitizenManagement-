@@ -13,33 +13,33 @@ import "../../assets/styles/dashboard.scss";
 const AdminPage = () => {
   const stats = [
     {
-      title: "Total Citizens",
+      title: "Cư Dân",
       value: 12543,
-      change: "+2.5% from last month",
+      change: "+2.5% so với tháng trước",
       icon: <Users size={24} />,
       iconBg: "#e6f4ff",
       iconColor: "#1890ff",
     },
     {
-      title: "Households",
+      title: "Hộ Gia Đình",
       value: 3842,
-      change: "+1.2% from last month",
+      change: "+1.2% so với tháng trước",
       icon: <Home size={24} />,
       iconBg: "#e6fffb",
       iconColor: "#13c2c2",
     },
     {
-      title: "Certificates",
+      title: "Giấy Tờ",
       value: 8291,
-      change: "+5.1% from last month",
+      change: "+5.1% so với tháng trước",
       icon: <FileText size={24} />,
       iconBg: "#f9f0ff",
       iconColor: "#722ed1",
     },
     {
-      title: "Temp Residence",
+      title: "Tạm Trú",
       value: 456,
-      change: "+0.8% from last month",
+      change: "+0.8% so với tháng trước",
       icon: <MapPin size={24} />,
       iconBg: "#fff7e6",
       iconColor: "#fa8c16",
@@ -49,23 +49,23 @@ const AdminPage = () => {
   const quickActions = [
     {
       icon: <Plus size={20} />,
-      title: "Add Citizen",
-      description: "Register a new citizen",
+      title: "Thêm Cư Dân",
+      description: "Đăng ký một cư dân mới",
     },
     {
       icon: <Plus size={20} />,
-      title: "New Household",
-      description: "Create household record",
+      title: "Hộ Gia Đình Mới",
+      description: "Tạo hồ sơ hộ gia đình mới",
     },
     {
       icon: <Search size={20} />,
-      title: "Search Records",
-      description: "Find citizen information",
+      title: "Tìm Kiếm Hồ Sơ",
+      description: "Tìm thông tin cư dân",
     },
     {
       icon: <Download size={20} />,
-      title: "Export Data",
-      description: "Generate reports",
+      title: "Xuất Dữ Liệu",
+      description: "Tạo báo cáo",
     },
   ];
 
@@ -74,50 +74,50 @@ const AdminPage = () => {
       icon: <User size={20} />,
       iconBg: "#e6f4ff",
       iconColor: "#1890ff",
-      title: "New citizen registered",
+      title: "Cư dân mới đăng ký",
       description: "Nguyen Van A",
-      time: "2 hours ago",
+      time: "2 giờ trước",
     },
     {
       icon: <Home size={20} />,
       iconBg: "#e6fffb",
       iconColor: "#13c2c2",
-      title: "Household updated",
-      description: "Household #HH-2025-001",
-      time: "4 hours ago",
+      title: "Hộ gia đình được cập nhật",
+      description: "Hộ gia đình #HH-2025-001",
+      time: "4 giờ trước",
     },
     {
       icon: <FileText size={20} />,
       iconBg: "#f9f0ff",
       iconColor: "#722ed1",
-      title: "Birth certificate issued",
-      description: "Certificate #BC-2025-0542",
-      time: "1 day ago",
+      title: "Giấy khai sinh được phát hành",
+      description: "Giấy tờ #BC-2025-0542",
+      time: "1 ngày trước",
     },
     {
       icon: <MapPin size={20} />,
       iconBg: "#fff7e6",
       iconColor: "#fa8c16",
-      title: "Temp residence registered",
+      title: "Tạm trú được đăng ký",
       description: "Tran Thi B",
-      time: "2 days ago",
+      time: "2 ngày trước",
     },
     {
       icon: <User size={20} />,
       iconBg: "#e6f4ff",
       iconColor: "#1890ff",
-      title: "Citizen record updated",
+      title: "Hồ sơ cư dân được cập nhật",
       description: "Le Van C",
-      time: "3 days ago",
+      time: "3 ngày trước",
     },
   ];
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1 className="dashboard-title">Dashboard</h1>
+        <h1 className="dashboard-title">Bảng Điều Khiển</h1>
         <p className="dashboard-subtitle">
-          Welcome back! Here's an overview of your system.
+          Chào mừng trở lại! Đây là tổng quan về hệ thống của bạn.
         </p>
       </div>
 
@@ -146,8 +146,8 @@ const AdminPage = () => {
       <div className="content-grid">
         <div className="quick-actions-card">
           <div className="card-header">
-            <h2 className="card-title">Quick Actions</h2>
-            <p className="card-subtitle">Common tasks</p>
+            <h2 className="card-title">Hành Động Nhanh</h2>
+            <p className="card-subtitle">Các tác vụ thường dùng</p>
           </div>
           <div className="actions-list">
             {quickActions.map((action, index) => (
@@ -164,8 +164,8 @@ const AdminPage = () => {
 
         <div className="activity-card">
           <div className="card-header">
-            <h2 className="card-title">Recent Activity</h2>
-            <p className="card-subtitle">Latest system activities</p>
+            <h2 className="card-title">Hoạt Động Gần Đây</h2>
+            <p className="card-subtitle">Các hoạt động hệ thống gần đây</p>
           </div>
           <div className="activity-list">
             {activities.map((activity, index) => (

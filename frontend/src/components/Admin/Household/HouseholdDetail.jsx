@@ -20,14 +20,14 @@ const HouseholdDetail = () => {
     console.log(res);
     if (res && res.success === true) {
       notification.success({
-        message: "Delete Household",
-        description: "success!",
+        message: "Xóa hộ khẩu",
+        description: "Xóa hộ khẩu thành công!",
       });
       await fetchHousehold();
     } else {
       notification.error({
-        message: "error",
-        description: JSON.stringify(res.error.message),
+        message: "Lỗi",
+        description: JSON.stringify(res.error.message)||"Không thể xóa hộ khẩu",
       });
     }
   };
@@ -51,6 +51,7 @@ const HouseholdDetail = () => {
         dataHousehold={dataHousehold}
         dataHouseholdMembers={dataHouseholdMembers}
         handleDelete={handleDelete}
+        fetchHousehold={() => fetchHousehold(id)}
       />
     </>
   );

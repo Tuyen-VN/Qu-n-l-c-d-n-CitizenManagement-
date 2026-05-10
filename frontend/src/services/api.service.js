@@ -292,6 +292,27 @@ const callFetchDashBoard = () => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+// === BIRTH CERTIFICATE API ===
+const callListBirthCertificatesAPI = (query) => {
+  const URL_BACKEND = `api/certificates/birth?${query}`;
+  return axios.get(URL_BACKEND);
+};
+
+const createBirthCertificateAPI = (data) => {
+  const URL_BACKEND = "/api/certificates/birth";
+  return axios.post(URL_BACKEND, data);
+};
+
+// === DEATH CERTIFICATE API ===
+const callListDeathCertificatesAPI = (query) => {
+  const URL_BACKEND = `api/certificates/death?${query}`;
+  return axios.get(URL_BACKEND);
+};
+
+const createDeathCertificateAPI = (data) => {
+  const URL_BACKEND = "/api/certificates/death";
+  return axios.post(URL_BACKEND, data);
+};
 export {
   loginUserAPI,
   callFetchAccount,
@@ -334,4 +355,8 @@ export {
   callListTemporaryAbsencesAPI,
   createTemporaryResidencesAPI,
   createTemporaryAbsencesAPI,
+  callListBirthCertificatesAPI,
+  createBirthCertificateAPI,
+  callListDeathCertificatesAPI,
+  createDeathCertificateAPI,
 };

@@ -158,18 +158,20 @@ const ResidenceTable = () => {
         title: "Mã công dân",
         dataIndex: "citizen_code",
         key: "citizen_code",
-        width: 140,
+        width: 130,
       },
       {
         title: "Họ tên",
         dataIndex: "full_name",
         key: "full_name",
+        width: 180, ellipsis: true
       },
-      { title: "SĐT", dataIndex: "phone", key: "phone", width: 120 },
-      { title: "Đ/c tạm trú", dataIndex: "address", key: "address" },
+      { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
+      { title: "Đ/c tạm trú", dataIndex: "address", key: "address", width: 250, ellipsis: true },
       {
         title: "Phường/Quận/Tỉnh",
         key: "pqd",
+        width: 220,
         render: (_, r) =>
           `${r.ward || "—"} / ${r.district || "—"} / ${r.province || "—"}`,
         responsive: ["lg"],
@@ -178,7 +180,7 @@ const ResidenceTable = () => {
         title: "Lý do",
         dataIndex: "reason",
         key: "reason",
-        width: 140,
+        width: 150, ellipsis: true,
         responsive: ["lg"],
       },
       {
@@ -186,21 +188,21 @@ const ResidenceTable = () => {
         dataIndex: "start_date",
         key: "start_date",
         render: fmt,
-        width: 120,
+        width: 110,
       },
       {
         title: "Kết thúc",
         dataIndex: "end_date",
         key: "end_date",
         render: fmt,
-        width: 120,
+        width: 110,
       },
       {
         title: "Còn lại (ngày)",
         dataIndex: "days_remaining",
         key: "days_remaining",
         align: "center",
-        width: 130,
+        width: 100,
         render: (v) => (
           <Tag color={v > 0 ? "processing" : "default"}>{v ?? "—"}</Tag>
         ),
@@ -209,7 +211,7 @@ const ResidenceTable = () => {
         title: "Trạng thái",
         dataIndex: "status",
         key: "status",
-        width: 120,
+        width: 110,
         render: (s) => <Tag color={STATUS_COLORS[s] || "default"}>{s}</Tag>,
       },
       {
@@ -230,18 +232,21 @@ const ResidenceTable = () => {
         title: "Mã công dân",
         dataIndex: "citizen_code",
         key: "citizen_code",
-        width: 140,
+        width: 130,
+        fixed: 'left',
       },
       {
         title: "Họ tên",
         dataIndex: "full_name",
         key: "full_name",
+        width: 180, ellipsis: true
       },
-      { title: "SĐT", dataIndex: "phone", key: "phone", width: 120 },
-      { title: "Địa chỉ đến", dataIndex: "destination", key: "destination" },
+      { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
+      { title: "Địa chỉ đến", dataIndex: "destination", key: "destination", width: 250, ellipsis: true },
       {
         title: "Phường/Huyện (nhà)",
         key: "home_addr",
+        width: 200,
         render: (_, r) => `${r.home_ward || "—"} / ${r.home_district || "—"}`,
         responsive: ["lg"],
       },
@@ -249,7 +254,7 @@ const ResidenceTable = () => {
         title: "Lý do",
         dataIndex: "reason",
         key: "reason",
-        width: 140,
+        width: 150, ellipsis: true,
         responsive: ["lg"],
       },
       {
@@ -257,14 +262,14 @@ const ResidenceTable = () => {
         dataIndex: "start_date",
         key: "start_date",
         render: fmt,
-        width: 120,
+        width: 110,
       },
       {
         title: "Dự kiến về",
         dataIndex: "expected_return_date",
         key: "expected_return_date",
         render: fmt,
-        width: 130,
+        width: 120,
       },
       {
         title: "Thực tế về",
@@ -289,7 +294,12 @@ const ResidenceTable = () => {
         dataIndex: "status",
         key: "status",
         width: 120,
-        render: (s) => <Tag color={STATUS_COLORS[s] || "default"}>{s}</Tag>,
+        render: (s) => (
+          <Tag color={STATUS_COLORS[s] || "default"} style={{ fontWeight: 600, borderRadius: '12px' }}>
+            {s === 'Active' ? 'Đang vắng' : s === 'Pending' ? 'Chờ duyệt' : 'Đã về'} 
+            {/* Bạn có thể Việt hóa trực tiếp nhãn ở đây nếu muốn */}
+          </Tag>
+        ),
       },
     ],
     []
@@ -301,10 +311,10 @@ const ResidenceTable = () => {
       <div className="residence-header">
         <div>
           <Title level={2} style={{ margin: 0 }}>
-            Temporary Residence & Absence
+            Tạm trú & Tạm vắng
           </Title>
           <Text className="residence-subtitle">
-            Manage temporary residence and absence records
+            Quản lý hồ sơ tạm trú và tạm vắng công dân
           </Text>
         </div>
         {/* BỎ nút create khỏi header chung để mỗi tab có nút riêng */}
@@ -312,9 +322,9 @@ const ResidenceTable = () => {
 
       <Card className="residence-records">
         <div className="residence-section-header">
-          <div className="residence-section-title">Records</div>
+          <div className="residence-section-title">Hồ sơ danh sách</div>
           <div className="residence-section-subtitle">
-            Temporary residence and absence records
+            Thông tin chi tiết các bản ghi tạm trú và tạm vắng
           </div>
         </div>
 
@@ -328,7 +338,7 @@ const ResidenceTable = () => {
           items={[
             {
               key: "residence",
-              label: "Temporary Residence",
+              label: "Tạm trú",
               children: (
                 <>
                   {/* Actions riêng tab Tạm trú */}
@@ -344,7 +354,7 @@ const ResidenceTable = () => {
                       Thêm tạm trú
                     </Button>
                     <Button icon={<ReloadOutlined />} onClick={fetchResidence}>
-                      Refresh
+                      Làm mới
                     </Button>
                   </div>
 
@@ -361,10 +371,10 @@ const ResidenceTable = () => {
                       showSizeChanger: true,
                       pageSizeOptions: [5, 10, 20, 50],
                       showTotal: (t, range) =>
-                        `${range[0]}-${range[1]} trên ${t} rows`,
+                        `${range[0]}-${range[1]} trên ${t} dòng`,
                     }}
                     scroll={{ x: 900 }}
-                    size="middle"
+                    size="small"
                     sticky
                     locale={{
                       emptyText: (
@@ -379,7 +389,7 @@ const ResidenceTable = () => {
             },
             {
               key: "absence",
-              label: "Temporary Absence",
+              label: "Tạm vắng",
               children: (
                 <>
                   {/* Actions riêng tab Tạm vắng */}
@@ -396,7 +406,7 @@ const ResidenceTable = () => {
                       Thêm tạm vắng
                     </Button>
                     <Button icon={<ReloadOutlined />} onClick={fetchAbsence}>
-                      Refresh
+                      Làm mới
                     </Button>
                   </div>
 
@@ -413,10 +423,10 @@ const ResidenceTable = () => {
                       showSizeChanger: true,
                       pageSizeOptions: [5, 10, 20, 50],
                       showTotal: (t, range) =>
-                        `${range[0]}-${range[1]} trên ${t} rows`,
+                        `${range[0]}-${range[1]} trên ${t} dòng`,
                     }}
                     scroll={{ x: 900 }}
-                    size="middle"
+                    size="small"
                     sticky
                     locale={{
                       emptyText: (

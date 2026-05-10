@@ -74,24 +74,24 @@ const HouseholdTable = () => {
       const res = await deleteHouseholdAPI(id);
       if (res && (res.success === true || res.status === 200)) {
         notification.success({
-          message: "Delete Household",
-          description: "Success!",
+          message: "Xóa hộ khẩu",
+          description: "Thành công!",
         });
         await fetchHousehold();
       } else {
         notification.error({
-          message: "Error",
+          message: "Lỗi",
           description:
             res?.error?.message ||
             res?.message ||
-            "Failed to delete household.",
+            "Không thể xóa hộ khẩu.",
         });
       }
     } catch (err) {
       notification.error({
-        message: "Error",
+        message: "Lỗi",
         description:
-          err?.response?.data?.message || err?.message || "Unexpected error.",
+          err?.response?.data?.message || err?.message || "Đã xảy ra lỗi không mong muốn.",
       });
     }
   };
@@ -175,8 +175,8 @@ const HouseholdTable = () => {
       console.log(res);
       if (res && res.success === true) {
         notification.success({
-          message: "Updated",
-          description: "Household updated successfully!",
+          message: "Cập nhật",
+          description: "Cập nhật hộ khẩu thành công!",
         });
         setEditingKey(null);
         setDraft({});
@@ -189,47 +189,59 @@ const HouseholdTable = () => {
       }
     } catch (err) {
       notification.error({
-        message: "Update failed",
+        message: "Cập nhật thất bại",
         description:
-          err?.response?.data?.message || err?.message || "Unexpected error.",
+          err?.response?.data?.message || err?.message || "Đã xảy ra lỗi không mong muốn.",
       });
     }
   };
 
   const columns = [
     {
-      title: "Household Number",
+      title: "Mã hộ khẩu",
       dataIndex: "household_code",
       key: "household_code",
       render: (t) => <span style={{ fontWeight: 500 }}>{t}</span>,
     },
     {
-      title: "Household Head",
+      title: "Chủ hộ",
       dataIndex: "head_full_name",
       key: "head_full_name",
       ellipsis: true,
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      width: 350,
-      ellipsis: true,
-      render: (_, record) =>
-        editingKey === record.household_id ? (
-          <Input
-            value={draft.address}
-            onChange={(e) =>
-              setDraft((d) => ({ ...d, address: e.target.value }))
-            }
-            placeholder="Enter address"
-          />
-        ) : (
-          record.address
-        ),
+      title: "Tổ dân phố",
+      key: "address_code",
+      width: 150,
+      render: (_, record) => {
+        // Trích xuất mã (ví dụ: HK-HN-BA-02) từ chuỗi address
+        const match = record.address?.match(/^[A-Z0-9-]+/);
+        return <Tag color="blue">{match ? match[0] : "—"}</Tag>;
+      },
     },
     {
-      title: "Household Type",
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 250,
+      ellipsis: true,
+      render: (text, record) => {
+        // Lọc bỏ mã để chỉ hiện địa chỉ nhà
+        const cleanAddress = text?.replace(/^[A-Z0-9-]+(?:\s*-\s*)/, "") || "—";
+        
+        if (editingKey === record.household_id) {
+          return (
+            <Input
+              value={draft.address}
+              onChange={(e) => setDraft((d) => ({ ...d, address: e.target.value }))}
+            />
+          );
+        }
+        return cleanAddress;
+      },
+    },
+    {
+      title: "Loại hộ khẩu",
       dataIndex: "household_type",
       key: "household_type",
       width: 160,
@@ -261,7 +273,7 @@ const HouseholdTable = () => {
       },
     },
     {
-      title: "Notes",
+      title: "Ghi chú",
       dataIndex: "notes",
       key: "notes",
       width: 280,
@@ -271,14 +283,14 @@ const HouseholdTable = () => {
           <Input
             value={draft.notes}
             onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
-            placeholder="Optional notes"
+            placeholder="Ghi chú (không bắt buộc)"
           />
         ) : (
           record.notes || "—"
         ),
     },
     {
-      title: "Members",
+      title: "Thành viên",
       dataIndex: "member_count",
       key: "member_count",
       width: 120,
@@ -289,7 +301,7 @@ const HouseholdTable = () => {
       ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       fixed: "right",
       width: 180,
@@ -321,9 +333,11 @@ const HouseholdTable = () => {
               onClick={() => startEdit(r)}
             />
             <Popconfirm
-              title="Delete household"
-              description="Are you sure you want to delete this household?"
+              title="Xóa hộ khẩu"
+              description="Bạn có chắc chắn muốn xóa hộ khẩu này không?"
               okType="danger"
+              okText="Xóa" // Thêm okText tiếng Việt
+              cancelText="Hủy" // Thêm cancelText tiếng Việt
               onConfirm={() => handleDelete(r.household_id)}
             >
               <Button type="text" danger icon={<DeleteOutlined />} />
@@ -339,9 +353,9 @@ const HouseholdTable = () => {
       <div className="household-container">
         <div className="page-header">
           <div className="header-content">
-            <h1 className="page-title">Households</h1>
+            <h1 className="page-title">Hộ khẩu</h1>
             <p className="page-subtitle">
-              Manage household records and members
+              Quản lý thông tin hộ khẩu và thành viên
             </p>
           </div>
           <Button
@@ -349,16 +363,16 @@ const HouseholdTable = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsCreateOpen(true)}
           >
-            New Household
+            Thêm hộ khẩu mới
           </Button>
         </div>
 
         <div className="content-card">
           <div className="card-header">
             <div className="card-header-text">
-              <h2 className="card-title">Household Records</h2>
+              <h2 className="card-title">Danh sách hộ khẩu</h2>
               <p className="card-subtitle">
-                View and manage all household information
+                Xem và quản lý tất cả thông tin hộ khẩu
               </p>
             </div>
           </div>
@@ -373,7 +387,7 @@ const HouseholdTable = () => {
           >
             <Input
               allowClear
-              placeholder="Search by household or ID number or Address"
+              placeholder="Tìm kiếm theo mã hộ khẩu, số định danh hoặc địa chỉ"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               prefix={<SearchOutlined />}
@@ -392,10 +406,13 @@ const HouseholdTable = () => {
               total,
               showSizeChanger: true,
               pageSizeOptions: [5, 10, 20, 50],
-              showTotal: (t, range) => `${range[0]}-${range[1]} trên ${t} rows`,
+              showTotal: (t, range) => `${range[0]}-${range[1]} trên ${t} dòng`,
             }}
-            scroll={{ x: 1100 }}
-            size="middle"
+            // ĐIỀU CHỈNH TẠI ĐÂY:
+            // x: 'max-content' sẽ tự động tính toán độ rộng dựa trên nội dung cột
+            // Hoặc đặt một con số cụ thể như 1200, 1500 tùy số lượng cột bạn thêm vào
+            scroll={{ x: 'max-content' }}
+            size="small"
             sticky
           />
         </div>

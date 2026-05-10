@@ -4,38 +4,38 @@ const HomePage = () => {
   const features = [
     {
       icon: <Users className="feature-icon" />,
-      title: "Citizen Management",
+      title: "Quản Lý Công Dân",
       description:
-        "Register and manage citizen records with complete information",
+        "Đăng ký và quản lý hồ sơ công dân với thông tin đầy đủ",
     },
     {
       icon: <Home className="feature-icon" />,
-      title: "Household Records",
-      description: "Track household information and member relationships",
+      title: "Hồ Sơ Hộ Khẩu",
+      description: "Theo dõi thông tin gia đình và mối quan hệ thành viên",
     },
     {
       icon: <FileText className="feature-icon" />,
-      title: "Vital Certificates",
-      description: "Issue and manage birth and death certificates",
+      title: "Giấy Tờ Quan Trọng",
+      description: "Cấp và quản lý giấy khai sinh, giấy khai tử",
     },
     {
       icon: <BarChart3 className="feature-icon" />,
-      title: "Reports & Analytics",
-      description: "Generate comprehensive reports and statistics",
+      title: "Báo Cáo & Thống Kê",
+      description: "Tạo báo cáo toàn diện và thống kê chi tiết",
     },
   ];
   return (
     <>
       <main className="main-content">
         <div className="hero-section">
-          <h1 className="hero-title">Government Citizen Management System</h1>
+          <h1 className="hero-title">Hệ Thống Quản Lý Công Dân Chính Phủ</h1>
           <p className="hero-description">
-            Comprehensive solution for managing citizen records,
+            Giải pháp toàn diện để quản lý hồ sơ công dân,
             <br />
-            households, vital certificates, and administrative data
+            Hộ khẩu, giấy tờ quan trọng và dữ liệu hành chính
           </p>
           <button className="get-started-btn">
-            Get Started <ArrowRight size={20} />
+            Bắt Đầu <ArrowRight size={20} />
           </button>
         </div>
 

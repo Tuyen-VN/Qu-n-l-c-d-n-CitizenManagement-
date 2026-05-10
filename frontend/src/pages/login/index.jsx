@@ -55,14 +55,14 @@ const LoginPage = () => {
         </div>
 
         <Title level={3} className="login-title" style={{ marginBottom: 8 }}>
-          Citizen Management System
+          Hệ Thống Quản Lý Công Dân
         </Title>
         <Text
           type="secondary"
           className="login-subtitle"
           style={{ display: "block", marginBottom: 24 }}
         >
-          Sign in to access the system
+          Đăng nhập để truy cập hệ thống
         </Text>
 
         <Form
@@ -74,9 +74,9 @@ const LoginPage = () => {
           initialValues={{ username: "", password: "" }}
         >
           <Form.Item
-            label="Username"
+            label="Tên đăng nhập"
             name="username"
-            rules={[{ required: true, message: "Please enter your username." }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập." }]}
           >
             <Input
               // placeholder="e.g. admin"
@@ -90,9 +90,9 @@ const LoginPage = () => {
           </Form.Item>
 
           <Form.Item
-            label="Password"
+            label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: "Please enter your password." }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu." }]}
           >
             <Input.Password
               placeholder="Your password"
@@ -109,7 +109,7 @@ const LoginPage = () => {
               block
               style={{ height: 48, background: "#1a4d8f" }}
             >
-              Sign In
+              Đăng Nhập
             </Button>
           </Form.Item>
         </Form>
@@ -121,7 +121,7 @@ const LoginPage = () => {
             icon={<ArrowLeft size={16} />}
             onClick={() => navigate("/")}
           >
-            Back to Home
+            Quay Lại Trang Chủ
           </Button>
         </Flex>
       </div>

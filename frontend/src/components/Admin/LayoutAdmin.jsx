@@ -30,34 +30,34 @@ const LayoutAdmin = () => {
   };
   const itemsMenu = [
     {
-      label: <Link to="/admin">Dashboard</Link>,
+      label: <Link to="/admin">Trang chủ</Link>,
       key: "dashboard",
       icon: <HomeOutlined />,
     },
     {
-      label: <Link to="/admin/citizen">Citizen</Link>,
+      label: <Link to="/admin/citizen">Quản lý công dân</Link>,
       key: "citizen",
       icon: <UserOutlined />,
     },
     {
-      label: <Link to="/admin/household">Household</Link>,
+      label: <Link to="/admin/household">Quản lý hộ khẩu</Link>,
       key: "household",
       icon: <HomeOutlined />,
     },
     {
-      label: <Link to="/admin/residence">Residence</Link>,
+      label: <Link to="/admin/residence">Tạm trú & Tạm vắng</Link>,
       key: "residence",
       icon: <HomeOutlined />,
     },
     {
-      label: <Link to="/admin/certificates">Certificates</Link>,
+      label: <Link to="/admin/certificates">Giấy tờ & Chứng nhận</Link>,
       key: "certificates",
       icon: <HomeOutlined />,
     },
     {
       label: (
         <label style={{ cursor: "pointer" }} onClick={handleLogout}>
-          Logout
+          Đăng xuất
         </label>
       ),
       key: "reports",
@@ -135,7 +135,7 @@ const LayoutAdmin = () => {
                 color: "#fff",
               }}
             >
-              Admin
+              Hệ thống Quản lý
             </h2>
             <Menu
               theme="dark"
@@ -199,7 +199,7 @@ const LayoutAdmin = () => {
           </Content>
           {role == "ADMIN" && (
             <Footer style={{ textAlign: "center", background: "#ddd" }}>
-              Copy right © Designed by Tial 2025
+              Bản quyền © Thiết kế bởi Nhóm 10 - 2026
             </Footer>
           )}
         </Layout>

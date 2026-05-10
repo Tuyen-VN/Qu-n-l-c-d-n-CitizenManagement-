@@ -38,7 +38,7 @@ const HouseholdMemberAddModal = (props) => {
         );
       }
     } catch {
-      message.error("Failed to load citizens");
+      message.error("Không thể tải danh sách công dân");
     } finally {
       setLoadingCitizens(false);
     }
@@ -67,13 +67,13 @@ const HouseholdMemberAddModal = (props) => {
     setSubmitting(true);
     try {
       await addHouseholdMemberAPI(householdId, payload);
-      message.success("Member added successfully");
+      message.success("Thêm thành viên thành công");
       setOpen(false);
       form.resetFields();
       handleMemberAdded?.(); // optional refresh callback
     } catch (err) {
       const msg =
-        err?.response?.data?.message || err?.message || "Failed to add member";
+        err?.response?.data?.message || err?.message || "Không thể thêm thành viên";
       message.error(msg);
     } finally {
       setSubmitting(false);
@@ -82,12 +82,12 @@ const HouseholdMemberAddModal = (props) => {
 
   return (
     <Modal
-      title="Add Household Member"
+      title="Thêm thành viên hộ khẩu"
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
-      okText="Add"
-      cancelText="Cancel"
+      okText="Thêm"
+      cancelText="Hủy"
       confirmLoading={submitting}
       maskClosable={!submitting}
       destroyOnClose
@@ -99,14 +99,14 @@ const HouseholdMemberAddModal = (props) => {
         requiredMark="optional"
       >
         <Form.Item
-          label="Citizen"
+          label="Công dân"
           name="citizen_id"
           rules={[{ required: true, message: "Please select a citizen" }]}
         >
           <Select
             showSearch
             allowClear
-            placeholder="Select or type a citizen"
+            placeholder="Chọn hoặc nhập tên công dân"
             notFoundContent={loadingCitizens ? <Spin size="small" /> : null}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -116,15 +116,15 @@ const HouseholdMemberAddModal = (props) => {
         </Form.Item>
 
         <Form.Item
-          label="Relationship to Head (Vietnamese)"
+          label="Mối quan hệ với chủ hộ"
           name="relationship_to_head"
           rules={[
-            { required: true, message: "Please enter relationship to head" },
+            { required: true, message: "Vui lòng chọn quan hệ với chủ hộ" },
           ]}
         >
           <Select
             showSearch
-            placeholder="Select a relationship"
+            placeholder="Chọn quan hệ gia đình"
             options={relationshipOptions}
             // Let users type custom Vietnamese value:
             // Use mode="combobox" if you want totally free typing:

@@ -31,7 +31,7 @@ const Header = () => {
   const items = [
     {
       key: "HomePage",
-      label: <Link to="/profile">Home Page</Link>,
+      label: <Link to="/profile">Trang Chủ</Link>,
     },
     // {
     //   key: "manageUser",
@@ -49,7 +49,7 @@ const Header = () => {
       key: "logout",
       label: (
         <label style={{ cursor: "pointer" }} onClick={handleLogout}>
-          Logout
+          Đăng Xuất
         </label>
       ),
       // icon: <IoLogOutOutline />,
@@ -57,7 +57,7 @@ const Header = () => {
   ];
   if (user?.role === "Admin") {
     items.unshift({
-      label: <Link to="/admin">Page Manage</Link>,
+      label: <Link to="/admin">Quản Lý</Link>,
       key: "admin",
     });
   }
@@ -69,7 +69,7 @@ const Header = () => {
           <div className="logo-icon">
             <Users size={20} />
           </div>
-          <span className="logo-text">Citizen Management System</span>
+          <span className="logo-text">Hệ Thống Quản Lý Công Dân</span>
         </div>
         <div className="header-actions">
           {isAuthenticated === true ? (
@@ -77,7 +77,7 @@ const Header = () => {
           ) : (
             <button className="login-btn" onClick={handleLogin}>
               <LogIn size={18} />
-              Login
+              Đăng Nhập
             </button>
           )}
           {isAuthenticated === true ? (
@@ -87,12 +87,12 @@ const Header = () => {
                   className="access-btn"
                   onClick={(e) => e.preventDefault()}
                 >
-                  Access System
+                  Truy Cập Hệ Thống
                 </button>
               </Dropdown>
             </div>
           ) : (
-            <button className="access-btn">Access System</button>
+            <button className="access-btn">Truy Cập Hệ Thống</button>
           )}
         </div>
       </div>

@@ -130,46 +130,46 @@ const CitizensTable = () => {
     console.log(res);
     if (res && res.success === true) {
       notification.success({
-        message: "Delete Citizen",
-        description: "success!",
+        message: "Xóa công dân",
+        description: "thành công!",
       });
       await fetchCitizen();
     } else {
       notification.error({
-        message: "error",
+        message: "lỗi",
         description: JSON.stringify(res.error.message),
       });
     }
   };
   const columns = [
     {
-      title: "Name",
+      title: "Tên",
       dataIndex: "full_name",
       key: "full_name",
       // ellipsis: true,
       render: (t) => <span style={{ fontWeight: 500 }}>{t}</span>,
     },
     {
-      title: "ID Citizen",
+      title: "Mã công dân",
       dataIndex: "citizen_code",
       key: "citizen_code",
       render: (t) => <code style={{ color: "rgba(0,0,0,.65)" }}>{t}</code>,
     },
     {
-      title: "Date of Birth",
+      title: "Ngày sinh",
       dataIndex: "date_of_birth",
       key: "date_of_birth",
       sorter: false,
       render: (value) => (value ? dayjs(value).format("DD/MM/YYYY") : "—"),
     },
     {
-      title: "Location",
+      title: "Địa chỉ",
       dataIndex: "permanent_address",
       key: "lpermanent_address",
       ellipsis: true,
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (s) => (
@@ -185,7 +185,7 @@ const CitizensTable = () => {
       onFilter: (value, record) => record.status === value,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       fixed: "right",
       width: 160,
@@ -202,8 +202,8 @@ const CitizensTable = () => {
             onClick={() => handleEdit(r)}
           />
           <Popconfirm
-            title="Delete citizen"
-            description="Are you sure you want to delete this citizen?"
+            title="Xóa công dân"
+            description="Bạn có chắc chắn muốn xóa công dân này không?"
             okType="danger"
             onConfirm={() => handleDelete(r.citizen_id)}
           >
@@ -219,9 +219,9 @@ const CitizensTable = () => {
       <div className="citizens-container">
         <div className="page-header">
           <div className="header-content">
-            <h1 className="page-title">Citizens</h1>
+            <h1 className="page-title">Công dân</h1>
             <p className="page-subtitle">
-              Manage citizen records and information
+              Quản lý hồ sơ và thông tin công dân
             </p>
           </div>
           <Button
@@ -229,16 +229,16 @@ const CitizensTable = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsCreateOpen(true)}
           >
-            Add Citizen
+            Thêm công dân
           </Button>
         </div>
 
         <div className="content-card">
           <div className="card-header">
             <div className="card-header-text">
-              <h2 className="card-title">Citizen Records</h2>
+              <h2 className="card-title">Hồ sơ công dân</h2>
               <p className="card-subtitle">
-                View and manage all citizen information
+                Xem và quản lý tất cả thông tin công dân
               </p>
             </div>
           </div>
@@ -253,7 +253,7 @@ const CitizensTable = () => {
           >
             <Input
               allowClear
-              placeholder="Search by name or ID number..."
+              placeholder="Tìm kiếm theo tên hoặc mã số..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);

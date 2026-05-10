@@ -51,7 +51,7 @@ const HouseholdModalCreate = ({
         setWards(data);
       }
     } catch (err) {
-      message.error("Không thể tải danh sách phường");
+      message.error("Không thể tải danh sách phường/xã");
       console.log(err);
     } finally {
       setLoadingWards(false);
@@ -87,19 +87,20 @@ const HouseholdModalCreate = ({
       household_type: values.household_type, // giữ tiếng Việt
       notes: values.notes?.trim() || null,
     };
+    console.log(">>> Kiểm tra payload gửi đi:", payload);
 
     setSubmitting(true);
     try {
       const res = await createHouseholdAPI(payload);
       console.log(res);
       if (res && res.data) {
-        message.success("Household created successfully!");
+        message.success("Tạo mới hộ khẩu thành công!");
         setIsCreateOpen(false);
         form.resetFields();
         await fetchHousehold?.();
       } else {
         notification.error({
-          message: "Đã có lỗi xảy ra",
+          message: "Đã có lỗi xảy ra, tạo hộ khẩu thất bại",
           description: JSON.stringify(res?.error.message),
         });
       }
@@ -107,7 +108,7 @@ const HouseholdModalCreate = ({
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        "Failed to create household";
+        "Không thể tạo hộ khẩu mới";
       message.error(msg);
     } finally {
       setSubmitting(false);
@@ -116,12 +117,12 @@ const HouseholdModalCreate = ({
 
   return (
     <Modal
-      title="Create New Household"
+      title="Tạo mới hộ khẩu"
       open={isCreateOpen}
       onOk={handleOk}
       onCancel={handleCancel}
-      okText="Create"
-      cancelText="Cancel"
+      okText="Tạo"
+      cancelText="Hủy"
       confirmLoading={submitting}
       maskClosable={!submitting}
       destroyOnClose
@@ -130,20 +131,20 @@ const HouseholdModalCreate = ({
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        requiredMark="optional"
+        
       >
         {/* Head of Household */}
         <Form.Item
-          label="Head of Household"
+          label="Chủ hộ"
           name="head_of_household_id"
           rules={[
-            { required: true, message: "Please select the head of household" },
+            { required: true, message: "Vui lòng chọn chủ hộ" },
           ]}
         >
           <Select
             showSearch
             allowClear
-            placeholder="Select or type a citizen"
+            placeholder="Chọn hoặc tìm kiếm công dân"
             notFoundContent={loadingCitizens ? <Spin size="small" /> : null}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -154,11 +155,11 @@ const HouseholdModalCreate = ({
 
         {/* Address */}
         <Form.Item
-          label="Address"
+          label="Địa chỉ"
           name="address"
           rules={[
-            { required: true, message: "Please enter the address" },
-            { max: 255, message: "Maximum 255 characters" },
+            { required: true, message: "Vui lòng nhập địa chỉ" },
+            { max: 255, message: "Địa chỉ tối đa 255 ký tự" },
           ]}
         >
           <Input placeholder="e.g., Số 3 Đường HK Seed" />
@@ -166,13 +167,13 @@ const HouseholdModalCreate = ({
 
         {/* Ward */}
         <Form.Item
-          label="Ward"
+          label="Tổ dân phố"
           name="ward_id"
-          rules={[{ required: true, message: "Please select a ward" }]}
+          rules={[{ required: true, message: "Vui lòng chọn tổ dân phố" }]}
         >
           <Select
             showSearch
-            placeholder="Select a ward"
+            placeholder="Chọn tổ dân phố"
             loading={loadingWards}
             options={wards}
             filterOption={(input, option) =>
@@ -183,24 +184,24 @@ const HouseholdModalCreate = ({
 
         {/* Household Type */}
         <Form.Item
-          label="Household Type"
+          label="Loại hộ khẩu"
           name="household_type"
-          rules={[{ required: true, message: "Please select household type" }]}
+          rules={[{ required: true, message: "Vui lòng chọn loại hộ khẩu" }]}
         >
           <Select
             options={[{ label: "Thường trú", value: "Thuong tru" }]}
-            placeholder="Select household type"
+            placeholder="Chọn loại hộ khẩu"
           />
         </Form.Item>
 
         {/* Notes */}
         <Form.Item
-          label="Notes"
+          label="Ghi chú"
           name="notes"
-          rules={[{ max: 500, message: "Maximum 500 characters" }]}
+          rules={[{ max: 500, message: "Tối đa 500 ký tự" }]}
         >
           <Input.TextArea
-            placeholder="Additional notes (optional)"
+            placeholder="Nhập ghi chú thêm (nếu có)"
             autoSize={{ minRows: 3, maxRows: 6 }}
           />
         </Form.Item>

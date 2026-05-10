@@ -1,9 +1,4 @@
-﻿-- =============================================
--- CITIZEN MANAGEMENT DATABASE
--- Version: 1.0
--- Database: CitizenManagementDB
--- =============================================
-
+﻿
 USE master;
 GO
 
