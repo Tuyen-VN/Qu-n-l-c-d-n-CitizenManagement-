@@ -60,8 +60,8 @@ const ResidenceTable = () => {
         citizen_code: x.citizen_code,
         full_name: x.full_name,
         phone: x.phone ?? "—",
-        address: x.temporary_address,
-        ward: x.ward_name,
+        temp_address: x.temporary_address, 
+        ward_name: x.ward_name,
         district: x.district_name,
         province: x.province_name,
         reason: x.reason,
@@ -98,7 +98,7 @@ const ResidenceTable = () => {
         citizen_code: x.citizen_code,
         full_name: x.full_name,
         phone: x.phone ?? "—",
-        destination: x.destination_address,
+        destination_address: x.destination_address, 
         home_ward: x.home_ward,
         home_district: x.home_district,
         reason: x.reason,
@@ -152,158 +152,93 @@ const ResidenceTable = () => {
   // console.log(residenceRows);
 
   // ===== Columns =====
-  const residenceCols = useMemo(
-    () => [
-      {
-        title: "Mã công dân",
-        dataIndex: "citizen_code",
-        key: "citizen_code",
-        width: 130,
+  const residenceCols = [
+    { title: "Mã CD", dataIndex: "citizen_code", key: "citizen_code", width: 120 },
+    { title: "Họ tên", dataIndex: "full_name", key: "full_name", width: 150 },
+    { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
+    
+    // ĐÃ SỬA THÀNH 'temp_address' ĐỂ KHỚP VỚI DATABASE
+    { title: "Địa chỉ tạm trú", dataIndex: "temp_address", key: "temp_address", width: 180 },
+    { title: "Tổ dân phố", dataIndex: "ward_name", key: "ward_name", width: 120 },
+    { title: "Lý do", dataIndex: "reason", key: "reason", width: 150 },
+    { title: "Bắt đầu", dataIndex: "start_date", key: "start_date", width: 110, render: fmt },
+    { title: "Kết thúc", dataIndex: "end_date", key: "end_date", width: 110, render: fmt },
+    
+    // ĐÃ SỬA LẠI LOGIC TÍNH NGÀY CÒN LẠI (Tự tính trên giao diện)
+    {
+      title: "Ngày còn lại",
+      key: "days_remaining",
+      width: 110,
+      render: (_, record) => {
+        if (record.status === "Expired" || record.status === "Cancelled") return "—";
+        if (!record.end_date) return "—";
+        
+        // Tính toán chênh lệch ngày bằng dayjs
+        const days = dayjs(record.end_date).diff(dayjs(), "day");
+        return (
+          <span style={{ color: days <= 30 && days >= 0 ? "red" : "inherit", fontWeight: 500 }}>
+            {days >= 0 ? `${days} ngày` : "Quá hạn"}
+          </span>
+        );
       },
-      {
-        title: "Họ tên",
-        dataIndex: "full_name",
-        key: "full_name",
-        width: 180, ellipsis: true
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 120,
+      render: (s) => {
+        let color = "default";
+        let label = s;
+        if (s === "Active") { color = "green"; label = "Đang tạm trú"; }
+        else if (s === "Expired") { color = "red"; label = "Hết hạn"; }
+        else if (s === "Cancelled") { color = "default"; label = "Đã hủy"; }
+        return <Tag color={color} style={{ fontWeight: 500 }}>{label}</Tag>;
       },
-      { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
-      { title: "Đ/c tạm trú", dataIndex: "address", key: "address", width: 250, ellipsis: true },
-      {
-        title: "Phường/Quận/Tỉnh",
-        key: "pqd",
-        width: 220,
-        render: (_, r) =>
-          `${r.ward || "—"} / ${r.district || "—"} / ${r.province || "—"}`,
-        responsive: ["lg"],
-      },
-      {
-        title: "Lý do",
-        dataIndex: "reason",
-        key: "reason",
-        width: 150, ellipsis: true,
-        responsive: ["lg"],
-      },
-      {
-        title: "Bắt đầu",
-        dataIndex: "start_date",
-        key: "start_date",
-        render: fmt,
-        width: 110,
-      },
-      {
-        title: "Kết thúc",
-        dataIndex: "end_date",
-        key: "end_date",
-        render: fmt,
-        width: 110,
-      },
-      {
-        title: "Còn lại (ngày)",
-        dataIndex: "days_remaining",
-        key: "days_remaining",
-        align: "center",
-        width: 100,
-        render: (v) => (
-          <Tag color={v > 0 ? "processing" : "default"}>{v ?? "—"}</Tag>
-        ),
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        width: 110,
-        render: (s) => <Tag color={STATUS_COLORS[s] || "default"}>{s}</Tag>,
-      },
-      {
-        title: "ĐK ngày",
-        dataIndex: "registration_date",
-        key: "registration_date",
-        render: fmt,
-        width: 130,
-        responsive: ["xl"],
-      },
-    ],
-    []
-  );
+    },
+  ];
 
-  const absenceCols = useMemo(
-    () => [
-      {
-        title: "Mã công dân",
-        dataIndex: "citizen_code",
-        key: "citizen_code",
-        width: 130,
-        fixed: 'left',
+  const absenceCols = [
+    { title: "Mã CD", dataIndex: "citizen_code", key: "citizen_code", width: 120 },
+    { title: "Họ tên", dataIndex: "full_name", key: "full_name", width: 150 },
+    { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
+    { title: "Nơi đến", dataIndex: "destination_address", key: "destination_address", width: 180 },
+    { title: "Lý do", dataIndex: "reason", key: "reason", width: 150 },
+    { title: "Ngày bắt đầu", dataIndex: "start_date", key: "start_date", width: 110, render: fmt },
+    { title: "Ngày về", dataIndex: "expected_return_date", key: "expected_return_date", width: 110, render: fmt },
+    
+    // ĐÃ SỬA LẠI LOGIC TÍNH NGÀY CÒN LẠI CHO TẠM VẮNG
+    {
+      title: "Ngày còn lại",
+      key: "days_remaining",
+      width: 110,
+      render: (_, record) => {
+        if (record.status === "Returned") return "—";
+        if (!record.expected_return_date) return "—";
+        
+        const days = dayjs(record.expected_return_date).diff(dayjs(), "day");
+        return (
+          <span style={{ color: days <= 30 && days >= 0 ? "red" : "inherit", fontWeight: 500 }}>
+            {days >= 0 ? `${days} ngày` : "Quá hạn"}
+          </span>
+        );
       },
-      {
-        title: "Họ tên",
-        dataIndex: "full_name",
-        key: "full_name",
-        width: 180, ellipsis: true
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 120,
+      render: (s) => {
+        let color = "default";
+        let label = s;
+        if (s === "Active") { color = "orange"; label = "Đang vắng"; }
+        else if (s === "Extended") { color = "blue"; label = "Đã gia hạn"; }
+        else if (s === "Returned") { color = "green"; label = "Đã về"; }
+        return <Tag color={color} style={{ fontWeight: 600, borderRadius: '12px' }}>{label}</Tag>;
       },
-      { title: "SĐT", dataIndex: "phone", key: "phone", width: 110 },
-      { title: "Địa chỉ đến", dataIndex: "destination", key: "destination", width: 250, ellipsis: true },
-      {
-        title: "Phường/Huyện (nhà)",
-        key: "home_addr",
-        width: 200,
-        render: (_, r) => `${r.home_ward || "—"} / ${r.home_district || "—"}`,
-        responsive: ["lg"],
-      },
-      {
-        title: "Lý do",
-        dataIndex: "reason",
-        key: "reason",
-        width: 150, ellipsis: true,
-        responsive: ["lg"],
-      },
-      {
-        title: "Bắt đầu",
-        dataIndex: "start_date",
-        key: "start_date",
-        render: fmt,
-        width: 110,
-      },
-      {
-        title: "Dự kiến về",
-        dataIndex: "expected_return_date",
-        key: "expected_return_date",
-        render: fmt,
-        width: 120,
-      },
-      {
-        title: "Thực tế về",
-        dataIndex: "actual_return_date",
-        key: "actual_return_date",
-        render: fmt,
-        width: 130,
-        responsive: ["lg"],
-      },
-      {
-        title: "Còn lại (ngày)",
-        dataIndex: "days_until_return",
-        key: "days_until_return",
-        align: "center",
-        width: 130,
-        render: (v) => (
-          <Tag color={v > 0 ? "processing" : "default"}>{v ?? "—"}</Tag>
-        ),
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        width: 120,
-        render: (s) => (
-          <Tag color={STATUS_COLORS[s] || "default"} style={{ fontWeight: 600, borderRadius: '12px' }}>
-            {s === 'Active' ? 'Đang vắng' : s === 'Pending' ? 'Chờ duyệt' : 'Đã về'} 
-            {/* Bạn có thể Việt hóa trực tiếp nhãn ở đây nếu muốn */}
-          </Tag>
-        ),
-      },
-    ],
-    []
-  );
+    },
+  ];
 
   // ===== render =====
   return (

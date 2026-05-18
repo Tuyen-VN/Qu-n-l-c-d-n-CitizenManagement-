@@ -45,54 +45,38 @@ class TemporaryResidenceService {
         ? 'WHERE ' + whereConditions.join(' AND ')
         : '';
 
-      // Count query
+      // === 1. Đếm tổng số bản ghi (Phục vụ Phân trang) ===
       const countQuery = `
         SELECT COUNT(*) as total
         FROM TemporaryResidences tr
         INNER JOIN Citizens c ON tr.citizen_id = c.citizen_id
         ${whereClause}
       `;
-
       const countResult = await request.query(countQuery);
       const totalCount = countResult.recordset[0].total;
 
-      // Data query
+      // === 2. Lấy dữ liệu thực tế (Chỉ JOIN đúng bảng Wards để lấy Tổ dân phố) ===
       const dataQuery = `
-        SELECT
-          tr.temp_residence_id,
-          tr.citizen_id,
-          c.citizen_code,
-          c.full_name,
-          c.phone,
-          tr.temporary_address,
-          w.ward_name,
-          d.district_name,
-          p.province_name,
-          tr.reason,
-          tr.start_date,
-          tr.end_date,
-          DATEDIFF(DAY, GETDATE(), tr.end_date) as days_remaining,
-          tr.status,
-          tr.registration_date,
-          tr.created_at
+        SELECT 
+          tr.temp_residence_id, tr.citizen_id, tr.temporary_address, 
+          tr.reason, tr.start_date, tr.end_date, tr.status, tr.created_at,
+          c.full_name, c.citizen_code, c.phone,
+          w.ward_name
         FROM TemporaryResidences tr
         INNER JOIN Citizens c ON tr.citizen_id = c.citizen_id
-        INNER JOIN Wards w ON tr.ward_id = w.ward_id
-        INNER JOIN Districts d ON w.district_id = d.district_id
-        INNER JOIN Provinces p ON d.province_id = p.province_id
+        LEFT JOIN Wards w ON tr.ward_id = w.ward_id
         ${whereClause}
-        ORDER BY tr.start_date DESC, tr.created_at DESC
-        OFFSET @offset ROWS
-        FETCH NEXT @pageSize ROWS ONLY
+        ORDER BY tr.created_at DESC
+        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
       `;
-
+      
       const dataResult = await request.query(dataQuery);
 
       return {
         data: dataResult.recordset,
         totalCount,
         page: parseInt(page),
-        pageSize: parseInt(pageSize),
+        pageSize: parseInt(pageSize)
       };
     } catch (error) {
       logger.error('Get temporary residences failed:', error);

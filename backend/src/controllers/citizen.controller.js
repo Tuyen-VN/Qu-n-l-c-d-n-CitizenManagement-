@@ -45,6 +45,17 @@ class CitizenController {
 
       const result = await citizenService.getCitizens(filters);
 
+      // === ĐOẠN THÊM MỚI ĐỂ DỊCH DỮ LIỆU TRẢ VỀ ===
+      if (result && result.data) {
+        result.data = result.data.map(citizen => {
+          if (citizen.gender === 'Male') citizen.gender = 'Nam';
+          else if (citizen.gender === 'Female') citizen.gender = 'Nữ';
+          else if (citizen.gender === 'Other') citizen.gender = 'Khác';
+          return citizen;
+        });
+      }
+      // ============================================
+
       return paginationResponse(
         res,
         result.data,
@@ -73,6 +84,12 @@ class CitizenController {
     try {
       const { id } = req.params;
       const citizen = await citizenService.getCitizenById(id);
+      
+      if (citizen) {
+        if (citizen.gender === 'Male') citizen.gender = 'Nam';
+        else if (citizen.gender === 'Female') citizen.gender = 'Nữ';
+        else if (citizen.gender === 'Other') citizen.gender = 'Khác';
+      }
 
       // Kiem tra quyen truy cap (Staff chi xem duoc citizen trong Ward cua minh)
       if (req.user.roleName === 'Staff' && req.allowedWardId) {
@@ -112,6 +129,19 @@ class CitizenController {
     try {
       const citizenData = req.body;
 
+      // Chuẩn hóa giới tính: Database yêu cầu (Nam, Nữ, Khác)
+      // Thay đổi logic tại hàm createCitizen và updateCitizen:
+      if (citizenData.gender) {
+        const g = citizenData.gender.toLowerCase().trim();
+        if (g === 'nam' || g === 'male') {
+          citizenData.gender = 'Male'; // Đẩy chữ tiếng Anh xuống DB cũ của bạn
+        } else if (g === 'nữ' || g === 'nu' || g === 'female') {
+          citizenData.gender = 'Female'; // Đẩy chữ tiếng Anh xuống DB cũ của bạn
+        } else {
+          citizenData.gender = 'Other';
+        }
+      }
+
       // Neu la Staff, chi duoc tao citizen trong Ward cua minh
       if (req.user.roleName === 'Staff' && req.allowedWardId) {
         if (citizenData.ward_id !== req.allowedWardId) {
@@ -146,7 +176,8 @@ class CitizenController {
         res,
         'CREATE_CITIZEN_FAILED',
         'Them cong dan that bai',
-        500
+        500,
+        [{ message: error.message }]  // ← Thêm dòng này
       );
     }
   }
@@ -160,6 +191,19 @@ class CitizenController {
     try {
       const { id } = req.params;
       const citizenData = req.body;
+
+      // Chuẩn hóa giới tính: Database yêu cầu (Nam, Nữ, Khác)
+      // Thay đổi logic tại hàm createCitizen và updateCitizen:
+      if (citizenData.gender) {
+        const g = citizenData.gender.toLowerCase().trim();
+        if (g === 'nam' || g === 'male') {
+          citizenData.gender = 'Male'; // Đẩy chữ tiếng Anh xuống DB cũ của bạn
+        } else if (g === 'nữ' || g === 'nu' || g === 'female') {
+          citizenData.gender = 'Female'; // Đẩy chữ tiếng Anh xuống DB cũ của bạn
+        } else {
+          citizenData.gender = 'Other';
+        }
+      }
 
       // Kiem tra quyen truy cap
       const existingCitizen = await citizenService.getCitizenById(id);
@@ -192,7 +236,8 @@ class CitizenController {
         res,
         'UPDATE_CITIZEN_FAILED',
         'Cap nhat thong tin cong dan that bai',
-        500
+        500,
+        [{ message: error.message }]  // ← Thêm dòng này
       );
     }
   }

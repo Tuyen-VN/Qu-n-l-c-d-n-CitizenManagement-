@@ -39,14 +39,18 @@ const callListWardAPI = () => {
 };
 const createCitizenAPI = (data) => {
   const URL_BACKEND = "/api/citizens";
-  const res = axios.post(URL_BACKEND, data);
-  return res;
+  return axios.post(URL_BACKEND, data).catch(error => {
+    // Return error response để frontend có thể xử lý
+    return error.response || error;
+  });
 };
 const updateCitizenAPI = (id, data) => {
   const URL_BACKEND = `/api/citizens/${id}`;
 
-  const res = axios.put(URL_BACKEND, data);
-  return res;
+  return axios.put(URL_BACKEND, data).catch(error => {
+    // Return error response để frontend có thể xử lý
+    return error.response || error;
+  });
 };
 
 const deleteCitizenAPI = (id) => {
@@ -58,6 +62,7 @@ const deleteCitizenAPI = (id) => {
 const callListHouseholdAPI = (query) => {
   const URL_BACKEND = `api/households?${query}`;
   const res = axios.get(URL_BACKEND);
+  console.log(res);
   return res;
 };
 
@@ -294,23 +299,23 @@ const callFetchDashBoard = () => {
 };
 // === BIRTH CERTIFICATE API ===
 const callListBirthCertificatesAPI = (query) => {
-  const URL_BACKEND = `api/certificates/birth?${query}`;
+  const URL_BACKEND = `api/birth-certificates?${query}`;
   return axios.get(URL_BACKEND);
 };
 
 const createBirthCertificateAPI = (data) => {
-  const URL_BACKEND = "/api/certificates/birth";
+  const URL_BACKEND = "/api/birth-certificates";
   return axios.post(URL_BACKEND, data);
 };
 
 // === DEATH CERTIFICATE API ===
 const callListDeathCertificatesAPI = (query) => {
-  const URL_BACKEND = `api/certificates/death?${query}`;
+  const URL_BACKEND = `api/death-certificates?${query}`;
   return axios.get(URL_BACKEND);
 };
 
 const createDeathCertificateAPI = (data) => {
-  const URL_BACKEND = "/api/certificates/death";
+  const URL_BACKEND = "/api/death-certificates";
   return axios.post(URL_BACKEND, data);
 };
 export {

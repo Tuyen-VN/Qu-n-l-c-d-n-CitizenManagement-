@@ -20,10 +20,10 @@ const CitizenModalDetail = (props) => {
         width="50vw"
       >
         <Descriptions title="Thông tin người dùng" column={2} bordered>
-          <Descriptions.Item label="Citizen code">
+          <Descriptions.Item label="Mã công dân">
             {citizenDetail?.citizen_code}
           </Descriptions.Item>
-          <Descriptions.Item label="Full name">
+          <Descriptions.Item label="Họ và tên">
             {citizenDetail?.full_name}
           </Descriptions.Item>
           <Descriptions.Item label="Email">
@@ -32,16 +32,16 @@ const CitizenModalDetail = (props) => {
           <Descriptions.Item label="Phone">
             {citizenDetail?.phone}
           </Descriptions.Item>
-          <Descriptions.Item label="Age">
+          <Descriptions.Item label="Tuổi">
             {citizenDetail?.age}
           </Descriptions.Item>
-          <Descriptions.Item label="Date of birth">
+          <Descriptions.Item label="Ngày sinh">
             {moment(citizenDetail?.date_of_birth).format(`DD/MM/YYYY`)}
           </Descriptions.Item>
-          <Descriptions.Item label="Gender">
+          <Descriptions.Item label="Giới tính">
             {citizenDetail?.gender}
           </Descriptions.Item>
-          <Descriptions.Item label="location" span={2}>
+          <Descriptions.Item label="Địa chỉ" span={2}>
             {citizenDetail?.permanent_address}
           </Descriptions.Item>
 

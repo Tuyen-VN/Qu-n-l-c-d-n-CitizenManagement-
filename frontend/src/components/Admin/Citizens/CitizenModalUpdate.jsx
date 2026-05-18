@@ -195,9 +195,9 @@ const CitizenModalUpdate = (props) => {
               <Select
                 placeholder="Chọn giới tính"
                 options={[
-                  { label: "Male", value: "Male" },
-                  { label: "Female", value: "Female" },
-                  { label: "Other", value: "Other" },
+                  { label: "Nam", value: "Nam" },
+                  { label: "Nữ", value: "Nữ" },
+                  { label: "Khác", value: "Khác" },
                 ]}
               />
             </Form.Item>
@@ -222,14 +222,14 @@ const CitizenModalUpdate = (props) => {
         <Row gutter={[20, 20]}>
           <Col xs={24} sm={12}>
             <Form.Item
-              label="Phường/Xã (ward_id)"
+              label="Tổ dân phố"
               name="ward_id"
-              rules={[{ required: true, message: "Vui lòng chọn phường/xã!" }]}
+              rules={[{ required: true, message: "Vui lòng chọn tổ dân phố!" }]}
             >
               <Select
                 showSearch
                 allowClear
-                placeholder="Chọn phường/xã"
+                placeholder="Chọn tổ dân phố"
                 options={wards}
                 onChange={(v) => form.setFieldsValue({ ward_id: v })}
               />

@@ -84,8 +84,8 @@ const HouseholdModalCreate = ({
       head_of_household_id: values.head_of_household_id,
       address: values.address?.trim(),
       ward_id: values.ward_id,
-      household_type: values.household_type, // giữ tiếng Việt
-      notes: values.notes?.trim() || null,
+      household_type: values.household_type || "Thường trú", // giữ tiếng Việt
+      notes: values.notes?.trim() || "",
     };
     console.log(">>> Kiểm tra payload gửi đi:", payload);
 
@@ -144,7 +144,7 @@ const HouseholdModalCreate = ({
           <Select
             showSearch
             allowClear
-            placeholder="Chọn hoặc tìm kiếm công dân"
+            placeholder="Chọn công dân"
             notFoundContent={loadingCitizens ? <Spin size="small" /> : null}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -162,7 +162,7 @@ const HouseholdModalCreate = ({
             { max: 255, message: "Địa chỉ tối đa 255 ký tự" },
           ]}
         >
-          <Input placeholder="e.g., Số 3 Đường HK Seed" />
+          <Input placeholder="Số nhà, tên đường , Phường Phúc Lợi" />
         </Form.Item>
 
         {/* Ward */}
@@ -189,22 +189,14 @@ const HouseholdModalCreate = ({
           rules={[{ required: true, message: "Vui lòng chọn loại hộ khẩu" }]}
         >
           <Select
-            options={[{ label: "Thường trú", value: "Thuong tru" }]}
+            options={[
+              { label: "Thường trú", value: "Thường trú" },
+              { label: "Tạm trú", value: "Tạm trú" },
+            ]}
             placeholder="Chọn loại hộ khẩu"
           />
         </Form.Item>
-
-        {/* Notes */}
-        <Form.Item
-          label="Ghi chú"
-          name="notes"
-          rules={[{ max: 500, message: "Tối đa 500 ký tự" }]}
-        >
-          <Input.TextArea
-            placeholder="Nhập ghi chú thêm (nếu có)"
-            autoSize={{ minRows: 3, maxRows: 6 }}
-          />
-        </Form.Item>
+    
       </Form>
     </Modal>
   );

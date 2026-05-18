@@ -118,8 +118,7 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
         destination_ward_code: v.destination_ward_code, // string (ward_code)
         reason: v.reason || null,
         start_date: v.start_date, // "YYYY-MM-DD"
-        expected_return_date: v.expected_return_date || null, // "YYYY-MM-DD" | null
-        notes: v.notes || null,
+        expected_return_date: v.expected_return_date || null // "YYYY-MM-DD" | null
       };
 
       const res = await createTemporaryAbsencesAPI(payload);
@@ -195,25 +194,7 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
           />
         </Form.Item>
 
-        {/* Ward code đích (chọn từ API, giá trị ward_code) */}
-        <Form.Item
-          label="Phường/Xã đến (ward_code)"
-          name="destination_ward_code"
-          rules={[{ required: true, message: "Chọn phường/xã đến" }]}
-          tooltip="Giá trị gửi lên là Ward Code (chuỗi), ví dụ: 20209"
-        >
-          <Select
-            showSearch
-            allowClear
-            placeholder="Tìm theo tên/code…"
-            filterOption={false}
-            onSearch={setWardSearch}
-            notFoundContent={
-              loadingWards ? <Spin size="small" /> : "Không có dữ liệu"
-            }
-            options={wardOptions}
-          />
-        </Form.Item>
+
 
         {/* Địa chỉ đến */}
         <Form.Item
@@ -221,7 +202,7 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
           name="destination_address"
           rules={[{ required: true, message: "Nhập địa chỉ đến" }]}
         >
-          <Input placeholder="Số nhà/đường, phường, quận, tỉnh..." />
+          <Input placeholder="Số nhà, tên đường , Phường Phúc Lợi" />
         </Form.Item>
 
         {/* Ngày bắt đầu / Ngày về dự kiến – lưu string, hiển thị DD/MM/YYYY */}
@@ -272,9 +253,6 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
           <Input.TextArea rows={3} placeholder="Lý do tạm vắng..." />
         </Form.Item>
 
-        <Form.Item label="Ghi chú" name="notes">
-          <Input.TextArea rows={2} placeholder="Ghi chú thêm (nếu có)..." />
-        </Form.Item>
       </Form>
     </Modal>
   );

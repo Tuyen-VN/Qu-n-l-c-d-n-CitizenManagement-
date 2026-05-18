@@ -126,8 +126,7 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
         ward_id: Number(v.ward_id),
         reason: v.reason || null,
         start_date: v.start_date,
-        end_date: v.end_date || null,
-        notes: v.notes || null,
+        end_date: v.end_date || null
       };
       setSubmitting(true);
       console.log(payload);
@@ -205,13 +204,13 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
           name="temporary_address"
           rules={[{ required: true, message: "Nhập địa chỉ tạm trú" }]}
         >
-          <Input placeholder="Số nhà/đường, phường, quận, tỉnh..." />
+          <Input placeholder="Số nhà, tên đường , Phường Phúc Lợi" />
         </Form.Item>
 
         <Form.Item
-          label="Phường/Xã (ward)"
+          label="Tổ dân phố"
           name="ward_id"
-          rules={[{ required: true, message: "Chọn phường/xã" }]}
+          rules={[{ required: true, message: "Chọn tổ dân phố" }]}
         >
           <Select
             showSearch
@@ -271,9 +270,7 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
         <Form.Item label="Lý do" name="reason">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item label="Ghi chú" name="notes">
-          <Input.TextArea rows={2} />
-        </Form.Item>
+        
       </Form>
     </Modal>
   );

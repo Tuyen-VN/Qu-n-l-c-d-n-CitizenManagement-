@@ -50,7 +50,7 @@ const LayoutAdmin = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: <Link to="/admin/certificates">Giấy tờ & Chứng nhận</Link>,
+      label: <Link to="/admin/certificates">Khai sinh & Khai tử</Link>,
       key: "certificates",
       icon: <HomeOutlined />,
     },

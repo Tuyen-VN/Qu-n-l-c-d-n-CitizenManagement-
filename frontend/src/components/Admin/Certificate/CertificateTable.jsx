@@ -78,7 +78,7 @@ const CertificateTable = () => {
     <div className="certificate-tracker">
       <div className="certificate-header">
         <div>
-          <Title level={2} style={{ margin: 0 }}>Giấy tờ & Chứng nhận</Title>
+          <Title level={2} style={{ margin: 0 }}>Khai sinh & Khai tử</Title>
           <Text className="certificate-subtitle">Quản lý các sự kiện khai sinh và khai tử của công dân</Text>
         </div>
       </div>

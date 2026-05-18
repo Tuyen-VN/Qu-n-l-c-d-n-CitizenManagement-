@@ -25,7 +25,7 @@ const createHouseholdValidation = [
 
   body('household_type')
     .optional()
-    .isIn(['Thuong tru', 'Tap the'])
+    .isIn(['Thường trú', 'Tạm trú'])
     .withMessage('Loai ho khau khong hop le'),
 
   body('notes')
@@ -48,7 +48,7 @@ const updateHouseholdValidation = [
 
   body('household_type')
     .optional()
-    .isIn(['Thuong tru', 'Tap the'])
+    .isIn(['Thường trú', 'Tạm trú'])
     .withMessage('Loai ho khau khong hop le'),
 
   body('notes')

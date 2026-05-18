@@ -1,5 +1,8 @@
 # CITIZEN MANAGEMENT SYSTEM - BACKEND API
 
+cd G:/CitizenManagement/backend 
+npm run dev
+
 Hệ thống quản lý công dân cho tỉnh/huyện/xã, xây dựng trên nền tảng Node.js + Express.js + SQL Server.
 
 ## 📋 MỤC LỤC

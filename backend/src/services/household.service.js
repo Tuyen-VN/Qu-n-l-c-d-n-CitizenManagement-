@@ -266,21 +266,20 @@ class HouseholdService {
         .input('head_of_household_id', sql.Int, householdData.head_of_household_id)
         .input('address', sql.NVarChar, householdData.address)
         .input('ward_id', sql.Int, householdData.ward_id)
-        .input('household_type', sql.NVarChar, householdData.household_type || 'Thuong tru')
-        .input('notes', sql.NVarChar, householdData.notes || null)
+        .input('household_type', sql.NVarChar, householdData.household_type || 'Thường trú')
+        .input('notes', sql.NVarChar(sql.MAX), householdData.notes || null) // THÊM DÒNG NÀY
         .input('created_by', sql.Int, createdBy)
         .query(`
           INSERT INTO Households (
             household_code, head_of_household_id, address, ward_id,
-            household_type, notes, created_by
+            household_type, notes, created_by -- Thêm 'notes' vào đây
           )
           OUTPUT INSERTED.household_id
           VALUES (
             @household_code, @head_of_household_id, @address, @ward_id,
-            @household_type, @notes, @created_by
+            @household_type, @notes, @created_by -- Thêm '@notes' vào đây
           )
         `);
-
       const householdId = insertResult.recordset[0].household_id;
 
       // Them chu ho vao thanh vien ho khau

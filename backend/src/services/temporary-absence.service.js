@@ -148,59 +148,34 @@ class TemporaryAbsenceService {
    * Dang ky tam vang
    */
   async createTemporaryAbsence(tempAbsData, createdBy) {
+    const pool = await getConnection();
+    const transaction = pool.transaction(); // Bắt đầu Transaction
     try {
-      const pool = await getConnection();
+      await transaction.begin();
 
-      // Kiem tra cong dan co ton tai khong
-      const citizenCheck = await pool
-        .request()
+      const citizenCheck = await transaction.request()
         .input('citizenId', sql.Int, tempAbsData.citizen_id)
-        .query(`
-          SELECT citizen_id, full_name, status, ward_id
-          FROM Citizens
-          WHERE citizen_id = @citizenId AND is_active = 1
-        `);
+        .query(`SELECT citizen_id, full_name, status, ward_id FROM Citizens WHERE citizen_id = @citizenId AND is_active = 1`);
 
-      if (citizenCheck.recordset.length === 0) {
-        throw new Error('Cong dan khong ton tai');
-      }
-
+      if (citizenCheck.recordset.length === 0) throw new Error('Cong dan khong ton tai');
       const citizen = citizenCheck.recordset[0];
+      if (citizen.status !== 'Active') throw new Error('Cong dan phai o trang thai Active');
 
-      if (citizen.status !== 'Active') {
-        throw new Error('Cong dan phai o trang thai Active');
-      }
-
-      // Kiem tra co dang ky tam vang dang hoat dong khong
-      const activeCheck = await pool
-        .request()
+      const activeCheck = await transaction.request()
         .input('citizenId', sql.Int, tempAbsData.citizen_id)
-        .query(`
-          SELECT temp_absence_id
-          FROM TemporaryAbsences
-          WHERE citizen_id = @citizenId AND status = 'Active'
-        `);
+        .query(`SELECT temp_absence_id FROM TemporaryAbsences WHERE citizen_id = @citizenId AND status = 'Active'`);
 
-      if (activeCheck.recordset.length > 0) {
-        throw new Error('Cong dan dang co dang ky tam vang hoat dong');
-      }
+      if (activeCheck.recordset.length > 0) throw new Error('Cong dan dang co dang ky tam vang hoat dong');
 
-      // Kiem tra thoi gian hop le
       const startDate = new Date(tempAbsData.start_date);
       const expectedReturnDate = new Date(tempAbsData.expected_return_date);
       const monthsDiff = (expectedReturnDate - startDate) / (1000 * 60 * 60 * 24 * 30);
 
-      if (monthsDiff > 12) {
-        throw new Error('Thoi han tam vang toi da la 12 thang');
-      }
+      if (monthsDiff > 12) throw new Error('Thoi han tam vang toi da la 12 thang');
+      if (startDate >= expectedReturnDate) throw new Error('Ngay bat dau phai truoc ngay du kien ve');
 
-      if (startDate >= expectedReturnDate) {
-        throw new Error('Ngay bat dau phai truoc ngay du kien ve');
-      }
-
-      // Tao dang ky tam vang
-      const result = await pool
-        .request()
+      // Chèn phiếu tạm vắng
+      const result = await transaction.request()
         .input('citizen_id', sql.Int, tempAbsData.citizen_id)
         .input('destination_address', sql.NVarChar, tempAbsData.destination_address)
         .input('destination_ward_code', sql.NVarChar, tempAbsData.destination_ward_code || null)
@@ -222,14 +197,23 @@ class TemporaryAbsenceService {
         `);
 
       const tempAbsId = result.recordset[0].temp_absence_id;
+
+      // === LIÊN THÔNG DỮ LIỆU: ĐỔI TRẠNG THÁI SANG 'Absent' ===
+      await transaction.request()
+        .input('citizen_id_update', sql.Int, tempAbsData.citizen_id)
+        .query(`UPDATE Citizens SET status = 'Absent', updated_at = GETDATE() WHERE citizen_id = @citizen_id_update`);
+
+      await transaction.commit();
       logger.info(`Temporary absence created: ${tempAbsId} by user ${createdBy}`);
 
       return await this.getTemporaryAbsenceById(tempAbsId);
     } catch (error) {
+      if (transaction) await transaction.rollback();
       logger.error('Create temporary absence failed:', error);
       throw error;
     }
   }
+  
 
   /**
    * Cap nhat tam vang
@@ -352,48 +336,42 @@ class TemporaryAbsenceService {
    * Danh dau da ve
    */
   async markAsReturned(tempAbsId, actualReturnDate = null) {
+    const pool = await getConnection();
+    const transaction = pool.transaction();
     try {
-      const pool = await getConnection();
+      await transaction.begin();
 
-      // Kiem tra tam vang co ton tai khong
-      const tempAbs = await this.getTemporaryAbsenceById(tempAbsId);
-      if (!tempAbs) {
-        throw new Error('Khong tim thay dang ky tam vang');
-      }
+      const tempAbsResult = await transaction.request()
+        .input('tempAbsId', sql.Int, tempAbsId)
+        .query('SELECT citizen_id, start_date, status FROM TemporaryAbsences WHERE temp_absence_id = @tempAbsId');
 
-      if (tempAbs.status === 'Returned') {
-        throw new Error('Dang ky tam vang da duoc danh dau la da ve');
-      }
+      if (tempAbsResult.recordset.length === 0) throw new Error('Khong tim thay dang ky tam vang');
+      const tempAbs = tempAbsResult.recordset[0];
+      if (tempAbs.status === 'Returned') throw new Error('Dang ky tam vang da duoc danh dau la da ve');
 
-      // Neu khong truyen ngay ve, lay ngay hom nay
       const returnDate = actualReturnDate || new Date().toISOString().split('T')[0];
 
-      // Kiem tra ngay ve hop le
-      const startDate = new Date(tempAbs.start_date);
-      const returnDateObj = new Date(returnDate);
-
-      if (returnDateObj < startDate) {
-        throw new Error('Ngay ve khong the truoc ngay bat dau tam vang');
-      }
-
-      // Danh dau da ve
-      await pool
-        .request()
+      // Đánh dấu đã về trên phiếu
+      await transaction.request()
         .input('tempAbsId', sql.Int, tempAbsId)
         .input('actualReturnDate', sql.Date, returnDate)
         .query(`
-          UPDATE TemporaryAbsences
-          SET
-            actual_return_date = @actualReturnDate,
-            status = 'Returned',
-            updated_at = GETDATE()
+          UPDATE TemporaryAbsences 
+          SET actual_return_date = @actualReturnDate, status = 'Returned', updated_at = GETDATE()
           WHERE temp_absence_id = @tempAbsId
         `);
 
+      // === LIÊN THÔNG DỮ LIỆU: TRẢ LẠI TRẠNG THÁI 'Active' ===
+      await transaction.request()
+        .input('citizenId', sql.Int, tempAbs.citizen_id)
+        .query(`UPDATE Citizens SET status = 'Active', updated_at = GETDATE() WHERE citizen_id = @citizenId`);
+
+      await transaction.commit();
       logger.info(`Temporary absence marked as returned: ${tempAbsId}`);
 
       return await this.getTemporaryAbsenceById(tempAbsId);
     } catch (error) {
+      if (transaction) await transaction.rollback();
       logger.error('Mark as returned failed:', error);
       throw error;
     }

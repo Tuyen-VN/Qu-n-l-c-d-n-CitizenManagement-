@@ -37,18 +37,13 @@ const createCitizenValidation = [
   body('gender')
     .notEmpty()
     .withMessage('Gioi tinh la bat buoc')
-    .isIn(['Male', 'Female', 'Other'])
+    .isIn(['Nam', 'Nữ', 'Khác'])
     .withMessage('Gioi tinh khong hop le'),
 
   body('ethnicity')
     .optional()
     .isLength({ max: 50 })
     .withMessage('Dan toc toi da 50 ky tu'),
-
-  body('nationality')
-    .optional()
-    .isLength({ max: 50 })
-    .withMessage('Quoc tich toi da 50 ky tu'),
 
   body('phone')
     .optional()
@@ -99,7 +94,7 @@ const updateCitizenValidation = [
 
   body('gender')
     .optional()
-    .isIn(['Male', 'Female', 'Other'])
+    .isIn(['Nam', 'Nữ', 'Khác'])
     .withMessage('Gioi tinh khong hop le'),
 
   body('phone')
@@ -138,7 +133,7 @@ const queryValidation = [
 
   query('gender')
     .optional()
-    .isIn(['Male', 'Female', 'Other'])
+    .isIn(['Nam', 'Nữ', 'Khác'])
     .withMessage('Gioi tinh khong hop le'),
 
   query('wardId')

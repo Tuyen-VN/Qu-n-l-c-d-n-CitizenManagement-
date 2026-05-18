@@ -106,7 +106,7 @@ const HouseholdMemberAddModal = (props) => {
           <Select
             showSearch
             allowClear
-            placeholder="Chọn hoặc nhập tên công dân"
+            placeholder="Chọn tên công dân"
             notFoundContent={loadingCitizens ? <Spin size="small" /> : null}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())

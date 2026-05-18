@@ -16,7 +16,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import {
+import {  
   callListCitizensAPI,
   deleteCitizenAPI,
 } from "../../../services/api.service";
@@ -27,17 +27,18 @@ import CitizenModalUpdate from "./CitizenModalUpdate";
 
 const DEBOUNCE_MS = 400;
 
-const statusColor = (s) => {
-  switch (s) {
-    case "Active":
-      return "green";
-    case "Pending":
-      return "gold";
-    case "Inactive":
-      return "red";
-    default:
-      return "blue";
-  }
+const STATUS_LABELS = {
+  Active:   "Đang sinh sống",
+  Absent:   "Tạm vắng",
+  Deceased: "Đã mất",
+  Inactive: "Không hoạt động",
+};
+
+const STATUS_COLORS = {
+  Active:   "green",
+  Absent:   "orange",
+  Deceased: "red",
+  Inactive: "default",
 };
 
 const CitizensTable = () => {
@@ -173,14 +174,15 @@ const CitizensTable = () => {
       dataIndex: "status",
       key: "status",
       render: (s) => (
-        <Tag color={statusColor(s)} style={{ fontWeight: 600 }}>
-          {s}
+        <Tag color={STATUS_COLORS[s] || "default"} style={{ fontWeight: 600 }}>
+          {STATUS_LABELS[s] || s}
         </Tag>
       ),
       filters: [
-        { text: "Active", value: "Active" },
-        { text: "Pending", value: "Pending" },
-        { text: "Inactive", value: "Inactive" },
+        { text: "Đang sinh sống", value: "Active" },
+        { text: "Tạm vắng",       value: "Absent" },
+        { text: "Đã mất",         value: "Deceased" },
+        { text: "Không hoạt động", value: "Inactive" },
       ],
       onFilter: (value, record) => record.status === value,
     },
@@ -264,7 +266,7 @@ const CitizensTable = () => {
           </div>
 
           <Table
-            rowKey="id"
+            rowKey="citizen_id"
             columns={columns}
             dataSource={citizensData}
             loading={loadingTable}
@@ -277,7 +279,7 @@ const CitizensTable = () => {
               pageSizeOptions: [5, 10, 20, 50],
 
               showTotal: (total, range) =>
-                `${range[0]}-${range[1]} trên ${total} rows`,
+                `${range[0]}-${range[1]} trên ${total} dòng`,
             }}
             scroll={{ x: 900 }}
             size="middle"

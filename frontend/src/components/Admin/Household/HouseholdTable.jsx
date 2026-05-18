@@ -211,13 +211,12 @@ const HouseholdTable = () => {
     },
     {
       title: "Tổ dân phố",
-      key: "address_code",
+      dataIndex: "ward_name",
+      key: "ward_name",
       width: 150,
-      render: (_, record) => {
-        // Trích xuất mã (ví dụ: HK-HN-BA-02) từ chuỗi address
-        const match = record.address?.match(/^[A-Z0-9-]+/);
-        return <Tag color="blue">{match ? match[0] : "—"}</Tag>;
-      },
+      render: (wardName) => (
+        <Tag color="blue">{wardName || "—"}</Tag>
+      ),
     },
     {
       title: "Địa chỉ",
@@ -253,9 +252,8 @@ const HouseholdTable = () => {
               value={draft.household_type}
               onChange={(v) => setDraft((d) => ({ ...d, household_type: v }))}
               options={[
-                { label: "Thường trú", value: "Thuong tru" },
-                { label: "Tạm trú", value: "Tam tru" },
-                { label: "Tập thể", value: "Tap the" },
+                { label: "Thường trú", value: "Thường trú" },
+                { label: "Tạm trú", value: "Tạm trú" },
               ]}
               placeholder="Select type"
             />
@@ -264,7 +262,6 @@ const HouseholdTable = () => {
         let color = "default";
         if (type === "Thường trú" || type === "Thuong tru") color = "green";
         else if (type === "Tạm trú" || type === "Tam tru") color = "gold";
-        else if (type === "Tập thể" || type === "Tap the") color = "purple";
         return (
           <Tag color={color} style={{ fontWeight: 500 }}>
             {type || "—"}
@@ -272,23 +269,7 @@ const HouseholdTable = () => {
         );
       },
     },
-    {
-      title: "Ghi chú",
-      dataIndex: "notes",
-      key: "notes",
-      width: 280,
-      ellipsis: true,
-      render: (_, record) =>
-        editingKey === record.household_id ? (
-          <Input
-            value={draft.notes}
-            onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
-            placeholder="Ghi chú (không bắt buộc)"
-          />
-        ) : (
-          record.notes || "—"
-        ),
-    },
+    
     {
       title: "Thành viên",
       dataIndex: "member_count",
@@ -296,7 +277,7 @@ const HouseholdTable = () => {
       width: 120,
       render: (s) => (
         <Tag color="blue" style={{ fontWeight: 600 }}>
-          {s} Members
+          {s} thành viên
         </Tag>
       ),
     },

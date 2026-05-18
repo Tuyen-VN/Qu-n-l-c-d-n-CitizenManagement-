@@ -16,7 +16,7 @@ class CitizenService {
         gender = null,
         minAge = null,
         maxAge = null,
-        status = 'Active',
+        status = 'null',
       } = filters;
 
       const offset = (page - 1) * pageSize;
@@ -44,7 +44,7 @@ class CitizenService {
         whereConditions.push('c.gender = @gender');
       }
 
-      if (status) {
+      if (status && status !== 'null') {
         request.input('status', sql.NVarChar, status);
         whereConditions.push('c.status = @status');
       }
@@ -177,6 +177,9 @@ class CitizenService {
     try {
       const pool = await getConnection();
 
+      // DEBUG: Log gender value
+      logger.info(`Creating citizen - Gender value: "${citizenData.gender}" (length: ${citizenData.gender?.length})`);
+
       // Kiem tra CCCD da ton tai chua
       const exists = await this.checkCitizenCodeExists(citizenData.citizen_code);
       if (exists) {
@@ -191,10 +194,7 @@ class CitizenService {
         .input('gender', sql.NVarChar, citizenData.gender)
         .input('place_of_birth', sql.NVarChar, citizenData.place_of_birth || null)
         .input('ethnicity', sql.NVarChar, citizenData.ethnicity || 'Kinh')
-        .input('religion', sql.NVarChar, citizenData.religion || null)
-        .input('nationality', sql.NVarChar, citizenData.nationality || 'Vietnam')
         .input('occupation', sql.NVarChar, citizenData.occupation || null)
-        .input('education_level', sql.NVarChar, citizenData.education_level || null)
         .input('phone', sql.NVarChar, citizenData.phone || null)
         .input('email', sql.NVarChar, citizenData.email || null)
         .input('permanent_address', sql.NVarChar, citizenData.permanent_address)
@@ -203,14 +203,12 @@ class CitizenService {
         .query(`
           INSERT INTO Citizens (
             citizen_code, full_name, date_of_birth, gender, place_of_birth,
-            ethnicity, religion, nationality, occupation, education_level,
-            phone, email, permanent_address, ward_id, created_by
+            ethnicity, occupation, phone, email, permanent_address, ward_id, created_by
           )
           OUTPUT INSERTED.citizen_id
           VALUES (
             @citizen_code, @full_name, @date_of_birth, @gender, @place_of_birth,
-            @ethnicity, @religion, @nationality, @occupation, @education_level,
-            @phone, @email, @permanent_address, @ward_id, @created_by
+            @ethnicity, @occupation, @phone, @email, @permanent_address, @ward_id, @created_by
           )
         `);
 
@@ -281,13 +279,14 @@ class CitizenService {
         request.input('occupation', sql.NVarChar, citizenData.occupation);
         updateFields.push('occupation = @occupation');
       }
-      if (citizenData.education_level !== undefined) {
-        request.input('education_level', sql.NVarChar, citizenData.education_level);
-        updateFields.push('education_level = @education_level');
-      }
       if (citizenData.permanent_address) {
         request.input('permanent_address', sql.NVarChar, citizenData.permanent_address);
         updateFields.push('permanent_address = @permanent_address');
+      }
+
+      if (citizenData.status !== undefined) {
+        request.input('status', sql.NVarChar, citizenData.status);
+        updateFields.push('status = @status');
       }
 
       updateFields.push('updated_at = GETDATE()');
@@ -379,7 +378,7 @@ class CitizenService {
           gender,
           COUNT(*) as count
         FROM Citizens
-        WHERE is_active = 1 AND status = 'Active'
+        WHERE is_active = 1 AND status IN ('Active', 'Absent')
       `;
 
       if (wardId) {
@@ -423,7 +422,7 @@ class CitizenService {
               ELSE '65+'
             END as age_group
           FROM Citizens
-          WHERE is_active = 1 AND status = 'Active'
+          WHERE is_active = 1 AND status IN ('Active', 'Absent')
       `;
 
       if (wardId) {

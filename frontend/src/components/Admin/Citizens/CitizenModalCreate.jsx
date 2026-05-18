@@ -74,10 +74,14 @@ const CitizenModalCreate = (props) => {
         });
       }
     } catch (e) {
-      notification.error({
-        message: "Đã có lỗi xảy ra",
-        description: e?.message || "Vui lòng thử lại",
-      });
+        notification.error({
+          message: "Đã có lỗi xảy ra",
+          // Lấy chi tiết lỗi từ response nếu có
+          description: e?.response?.data?.details?.[0]?.message 
+                    || e?.response?.data?.error?.message 
+                    || e?.message 
+                    || "Vui lòng thử lại",
+        });
     } finally {
       setIsSubmit(false);
     }
@@ -170,9 +174,9 @@ const CitizenModalCreate = (props) => {
                 <Select
                   placeholder="Chọn giới tính"
                   options={[
-                    { label: "Nam", value: "Male" },
-                    { label: "Nữ", value: "Female" },
-                    { label: "Khác", value: "Other" },
+                    { label: "Nam", value: "Nam" },
+                    { label: "Nữ", value: "Nữ" },
+                    { label: "Khác", value: "Khác" },
                   ]}
                 />
               </Form.Item>
@@ -189,7 +193,7 @@ const CitizenModalCreate = (props) => {
                   { min: 5, message: "Địa chỉ quá ngắn." },
                 ]}
               >
-                <Input placeholder="123 Lê Lợi, Phường 1" />
+                <Input placeholder="Số nhà, tên đường , Phường Phúc Lợi" />
               </Form.Item>
             </Col>
           </Row>
@@ -197,16 +201,16 @@ const CitizenModalCreate = (props) => {
           <Row gutter={[20, 20]}>
             <Col xs={24} sm={12}>
               <Form.Item
-                label="Phường/Xã (ward_id)"
+                label="Tổ dân phố"
                 name="ward_id"
                 rules={[
-                  { required: true, message: "Vui lòng chọn phường/xã!" },
+                  { required: true, message: "Vui lòng chọn tổ dân phố!" },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Chọn phường/xã"
+                  placeholder="Chọn tổ dân phố"
                   options={wards}
                   // Nếu ward_id là số, đảm bảo value là number:
                   onChange={(v) => form.setFieldsValue({ ward_id: v })}
