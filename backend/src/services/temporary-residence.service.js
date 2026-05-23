@@ -152,8 +152,8 @@ class TemporaryResidenceService {
         throw new Error('Cong dan khong ton tai');
       }
 
-      if (citizenCheck.recordset[0].status !== 'Active') {
-        throw new Error('Cong dan phai o trang thai Active');
+      if (!['Active', 'Absent'].includes(citizenCheck.recordset[0].status)) {
+        throw new Error('Cong dan khong o trang thai hop le de dang ky tam tru');
       }
 
       // Kiem tra co dang ky tam tru dang hoat dong khong
@@ -205,16 +205,16 @@ class TemporaryResidenceService {
         .input('notes', sql.NVarChar, tempResData.notes || null)
         .input('created_by', sql.Int, createdBy)
         .query(`
-          INSERT INTO TemporaryResidences (
-            citizen_id, temporary_address, ward_id, reason,
-            start_date, end_date, notes, created_by
-          )
-          OUTPUT INSERTED.temp_residence_id
-          VALUES (
-            @citizen_id, @temporary_address, @ward_id, @reason,
-            @start_date, @end_date, @notes, @created_by
-          )
-        `);
+        INSERT INTO TemporaryResidences (
+          citizen_id, temporary_address, ward_id, reason,
+          start_date, end_date, notes, created_by
+        )
+        VALUES (
+          @citizen_id, @temporary_address, @ward_id, @reason,
+          @start_date, @end_date, @notes, @created_by
+        );
+        SELECT SCOPE_IDENTITY() AS temp_residence_id;
+      `);
 
       const tempResId = result.recordset[0].temp_residence_id;
       logger.info(`Temporary residence created: ${tempResId} by user ${createdBy}`);

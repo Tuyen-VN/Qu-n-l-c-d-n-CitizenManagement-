@@ -3,53 +3,59 @@ const { body, param, query } = require('express-validator');
 // ==================== BIRTH CERTIFICATE VALIDATORS ====================
 
 const createBirthCertValidation = [
-  body('child_citizen_id')
-    .notEmpty()
-    .withMessage('ID tre la bat buoc')
-    .isInt({ min: 1 })
-    .withMessage('ID tre khong hop le'),
-
+  // ── Thông tin trẻ (nhập trực tiếp, không còn child_citizen_id) ──
+  body('child_full_name')
+    .notEmpty().withMessage('Ho ten tre la bat buoc')
+    .isLength({ max: 100 }).withMessage('Ho ten tre toi da 100 ky tu'),
+ 
+  body('child_dob')
+    .notEmpty().withMessage('Ngay sinh cua tre la bat buoc')
+    .isDate().withMessage('Ngay sinh khong hop le')
+    .custom((value) => {
+      if (new Date(value) > new Date()) {
+        throw new Error('Ngay sinh khong the lon hon ngay hom nay');
+      }
+      return true;
+    }),
+ 
+  body('child_gender')
+    .notEmpty().withMessage('Gioi tinh cua tre la bat buoc')
+    .isIn(['Male', 'Female']).withMessage('Gioi tinh phai la Male hoac Female'),
+ 
+  // ── Cha mẹ vẫn là optional ──
   body('father_citizen_id')
     .optional()
-    .isInt({ min: 1 })
-    .withMessage('ID cha khong hop le'),
-
+    .isInt({ min: 1 }).withMessage('ID cha khong hop le'),
+ 
   body('mother_citizen_id')
     .optional()
-    .isInt({ min: 1 })
-    .withMessage('ID me khong hop le'),
-
+    .isInt({ min: 1 }).withMessage('ID me khong hop le'),
+ 
   body('birth_place')
     .optional()
-    .isLength({ max: 255 })
-    .withMessage('Noi sinh toi da 255 ky tu'),
-
+    .isLength({ max: 255 }).withMessage('Noi sinh toi da 255 ky tu'),
+ 
   body('registrar_name')
     .optional()
-    .isLength({ max: 100 })
-    .withMessage('Ten nguoi dang ky toi da 100 ky tu'),
-
+    .isLength({ max: 100 }).withMessage('Ten nguoi dang ky toi da 100 ky tu'),
+ 
   body('notes')
     .optional()
-    .isLength({ max: 500 })
-    .withMessage('Ghi chu toi da 500 ky tu'),
+    .isLength({ max: 500 }).withMessage('Ghi chu toi da 500 ky tu'),
 ];
-
+ 
 const updateBirthCertValidation = [
   body('birth_place')
     .optional()
-    .isLength({ max: 255 })
-    .withMessage('Noi sinh toi da 255 ky tu'),
-
+    .isLength({ max: 255 }).withMessage('Noi sinh toi da 255 ky tu'),
+ 
   body('registrar_name')
     .optional()
-    .isLength({ max: 100 })
-    .withMessage('Ten nguoi dang ky toi da 100 ky tu'),
-
+    .isLength({ max: 100 }).withMessage('Ten nguoi dang ky toi da 100 ky tu'),
+ 
   body('notes')
     .optional()
-    .isLength({ max: 500 })
-    .withMessage('Ghi chu toi da 500 ky tu'),
+    .isLength({ max: 500 }).withMessage('Ghi chu toi da 500 ky tu'),
 ];
 
 // ==================== DEATH CERTIFICATE VALIDATORS ====================

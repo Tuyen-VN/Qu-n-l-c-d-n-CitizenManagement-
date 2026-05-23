@@ -104,9 +104,7 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
     () =>
       wards.map((w) => ({
         value: Number(w.ward_id), // number
-        label: `${w.ward_name} — ${w.district_name || ""} — ${
-          w.province_name || ""
-        } [${w.ward_code}]`,
+        label: w.ward_name,
       })),
     [wards]
   );
@@ -121,7 +119,7 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
       const v = await form.validateFields();
 
       const payload = {
-        citizen_id: v.citizen_id,
+        citizen_id: Number(v.citizen_id),
         temporary_address: v.temporary_address,
         ward_id: Number(v.ward_id),
         reason: v.reason || null,

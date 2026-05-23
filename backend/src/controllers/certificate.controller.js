@@ -79,23 +79,32 @@ class BirthCertificateController {
     }
   }
 
-  async createBirthCertificate(req, res) {
-    try {
-      const certData = req.body;
-      const cert = await birthCertService.createBirthCertificate(certData, req.user.userId);
-
-      return successResponse(res, cert, 'Cap giay khai sinh thanh cong', 201);
-    } catch (error) {
-      logger.error('Create birth certificate controller error:', error);
-      if (error.message.includes('da co giay khai sinh')) {
-        return conflictResponse(res, error.message);
-      }
-      if (error.message.includes('khong ton tai') || error.message.includes('phai') || error.message.includes('Qua thoi han')) {
-        return errorResponse(res, 'INVALID_DATA', error.message, 400);
-      }
-      return errorResponse(res, 'CREATE_BIRTH_CERT_FAILED', 'Cap giay khai sinh that bai', 500);
+async createBirthCertificate(req, res) {
+  try {
+    const certData = req.body;
+ 
+    // Staff dùng wardId được gán; Admin có thể truyền wardId trong body
+    const wardId = req.allowedWardId || certData.wardId || null;
+ 
+    const cert = await birthCertService.createBirthCertificate(certData, req.user.userId, wardId);
+ 
+    return successResponse(res, cert, 'Cap giay khai sinh thanh cong', 201);
+  } catch (error) {
+    logger.error('Create birth certificate controller error:', error);
+    if (error.message.includes('da co giay khai sinh')) {
+      return conflictResponse(res, error.message);
     }
+    if (
+      error.message.includes('khong ton tai') ||
+      error.message.includes('phai') ||
+      error.message.includes('Qua thoi han') ||
+      error.message.includes('it nhat')
+    ) {
+      return errorResponse(res, 'INVALID_DATA', error.message, 400);
+    }
+    return errorResponse(res, 'CREATE_BIRTH_CERT_FAILED', 'Cap giay khai sinh that bai', 500);
   }
+}
 
   async updateBirthCertificate(req, res) {
     try {
