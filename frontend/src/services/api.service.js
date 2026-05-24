@@ -1,5 +1,34 @@
 import axios from "../utils/axios-customize";
 
+// =====================================================================
+// ĐOẠN CODE ĐÁNH CHẶN LỖI 401 (TOKEN HẾT HẠN)
+// =====================================================================
+axios.interceptors.response.use(
+  (response) => {
+    // API thành công, cho đi qua bình thường
+    return response;
+  },
+  (error) => {
+    // Nếu lỗi trả về là 401 (Unauthorized - Hết hạn token hoặc không hợp lệ)
+    if (error.response && error.response.status === 401) {
+      console.warn("Token đã hết hạn, hệ thống đang tự động đăng xuất...");
+      
+      // Xóa token cũ trong Local Storage
+      // LƯU Ý: Đổi "access_token" thành đúng cái tên mà bạn đã dùng để lưu token lúc đăng nhập nhé!
+      localStorage.removeItem("access_token"); 
+      
+      // Thông báo cho người dùng
+      alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+
+      // Đá về trang login
+      window.location.href = "/login";
+    }
+    
+    return Promise.reject(error);
+  }
+);
+// =====================================================================
+
 const loginUserAPI = (username, password) => {
   const URL_BACKEND = "/api/auth/login";
   const data = {
@@ -10,18 +39,22 @@ const loginUserAPI = (username, password) => {
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const callFetchAccount = () => {
   const URL_BACKEND = "/api/auth/me";
   return axios.get(URL_BACKEND);
 };
+
 const callUserById = (id) => {
   const URL_BACKEND = `/api/users/${id}`;
   return axios.get(URL_BACKEND);
 };
+
 const callChangePassword = (data) => {
   const URL_BACKEND = `/api/auth/change-password`;
   return axios.post(URL_BACKEND, data);
 };
+
 const callLogout = () => {
   const URL_BACKEND = "/api/auth/logout";
   return axios.post(URL_BACKEND);
@@ -32,23 +65,23 @@ const callListCitizensAPI = (query) => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callListWardAPI = () => {
   const URL_BACKEND = `api/wards`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const createCitizenAPI = (data) => {
   const URL_BACKEND = "/api/citizens";
   return axios.post(URL_BACKEND, data).catch(error => {
-    // Return error response để frontend có thể xử lý
     return error.response || error;
   });
 };
+
 const updateCitizenAPI = (id, data) => {
   const URL_BACKEND = `/api/citizens/${id}`;
-
   return axios.put(URL_BACKEND, data).catch(error => {
-    // Return error response để frontend có thể xử lý
     return error.response || error;
   });
 };
@@ -71,31 +104,37 @@ const callHouseholdAPI = (id) => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callHouseholdMembersdAPI = (id) => {
   const URL_BACKEND = `api/households/${id}/members`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const createHouseholdAPI = (data) => {
   const URL_BACKEND = "/api/households";
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const addHouseholdMemberAPI = (householdId, data) => {
   const URL_BACKEND = `api/households/${householdId}/members`;
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const deleteHouseholdMemberAPI = (id, citizensId) => {
   const URL_BACKEND = `api/households/${id}/members/${citizensId}`;
   const res = axios.delete(URL_BACKEND);
   return res;
 };
+
 const updateHouseholdAPI = (id, data) => {
   const URL_BACKEND = `api/households/${id}`;
   const res = axios.put(URL_BACKEND, data);
   return res;
 };
+
 const deleteHouseholdAPI = (id) => {
   const URL_BACKEND = `api/households/${id}`;
   const res = axios.delete(URL_BACKEND);
@@ -107,6 +146,7 @@ const callListTemporaryResidencesAPI = (query) => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const createTemporaryResidencesAPI = (data) => {
   const URL_BACKEND = `api/temporary-residences`;
   const res = axios.post(URL_BACKEND, data);
@@ -118,11 +158,13 @@ const callListTemporaryAbsencesAPI = (query) => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const createTemporaryAbsencesAPI = (data) => {
   const URL_BACKEND = `api/temporary-absences`;
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const callListUserAPI = (query) => {
   const URL_BACKEND = `/api/v1/user?${query}`;
   const res = axios.get(URL_BACKEND);
@@ -140,16 +182,19 @@ const createUserAPI = (fullName, email, password, phone) => {
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const callBulkCreateUser = (data) => {
   const URL_BACKEND = "/api/v1/user/bulk-create";
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const deleteUserAPI = (id) => {
   const URL_BACKEND = `/api/v1/user/${id}`;
   const res = axios.delete(URL_BACKEND);
   return res;
 };
+
 const editUserAPI = (id, fullName, phone) => {
   const URL_BACKEND = `/api/v1/user/`;
   const data = {
@@ -160,16 +205,19 @@ const editUserAPI = (id, fullName, phone) => {
   const res = axios.put(URL_BACKEND, data);
   return res;
 };
+
 const callListBookAPI = (query) => {
   const URL_BACKEND = `/api/v1/book?${query}`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callListCategoryAPI = () => {
   const URL_BACKEND = "/api/v1/database/category";
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callUploadBookImg = (fileImg) => {
   const bodyFormData = new FormData();
   bodyFormData.append("fileImg", fileImg);
@@ -183,6 +231,7 @@ const callUploadBookImg = (fileImg) => {
     },
   });
 };
+
 const createBookAPI = (
   thumbnail,
   slider,
@@ -207,11 +256,13 @@ const createBookAPI = (
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const deleteBookAPI = (id) => {
   const URL_BACKEND = `/api/v1/book/${id}`;
   const res = axios.delete(URL_BACKEND);
   return res;
 };
+
 const editBookAPI = (
   _id,
   thumbnail,
@@ -237,21 +288,25 @@ const editBookAPI = (
   const res = axios.put(URL_BACKEND, data);
   return res;
 };
+
 const getBookAPI = (id) => {
   const URL_BACKEND = `/api/v1/book/${id}`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callOrderAPI = (data) => {
   const URL_BACKEND = `/api/v1/order`;
   const res = axios.post(URL_BACKEND, data);
   return res;
 };
+
 const callOrderHistory = () => {
   const URL_BACKEND = `/api/v1/history`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callUpdateAvatar = (fileImg) => {
   const bodyFormData = new FormData();
   bodyFormData.append("fileImg", fileImg);
@@ -265,6 +320,7 @@ const callUpdateAvatar = (fileImg) => {
     },
   });
 };
+
 const callUpdateUserInfo = (_id, phone, fullName, avatarUser) => {
   const URL_BACKEND = `/api/v1/user`;
   const data = {
@@ -276,6 +332,7 @@ const callUpdateUserInfo = (_id, phone, fullName, avatarUser) => {
   const res = axios.put(URL_BACKEND, data);
   return res;
 };
+
 const callOnChangePassWord = (email, oldpass, newpass) => {
   const URL_BACKEND = `/api/v1/user/change-password`;
   const data = {
@@ -292,11 +349,13 @@ const callOrderApi = (query) => {
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 const callFetchDashBoard = () => {
   const URL_BACKEND = `/api/v1/database/dashboard`;
   const res = axios.get(URL_BACKEND);
   return res;
 };
+
 // === BIRTH CERTIFICATE API ===
 const callListBirthCertificatesAPI = (query) => {
   const URL_BACKEND = `api/birth-certificates?${query}`;
@@ -318,6 +377,7 @@ const createDeathCertificateAPI = (data) => {
   const URL_BACKEND = "/api/death-certificates";
   return axios.post(URL_BACKEND, data);
 };
+
 export {
   loginUserAPI,
   callFetchAccount,
@@ -365,3 +425,4 @@ export {
   callListDeathCertificatesAPI,
   createDeathCertificateAPI,
 };
+

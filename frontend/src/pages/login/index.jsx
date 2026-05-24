@@ -13,32 +13,45 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const onFinish = async (values) => {
     const { username, password } = values;
     try {
       setLoading(true);
       const res = await loginUserAPI(username.trim(), password);
+      
       if (res && res.data) {
         localStorage.setItem("access_token", res.data.accessToken);
         localStorage.setItem("refresh_token", res.data.refreshToken);
+        
         notification.success({
-          message: "Sign in",
-          description: "Signed in successfully.",
+          message: "Đăng nhập thành công",
+          description: "Chào mừng bạn quay lại hệ thống.",
         });
+        
+        // Lưu thông tin vào Redux
         dispatch(doLoginAction(res.data.user));
-        navigate("/");
+        
+        // KIỂM TRA ROLE ĐỂ ĐIỀU HƯỚNG
+        const role = res.data.user.role || res.data.user.role_name;
+        if (role === "Admin" || role === "ADMIN" || role === "Staff") {
+          navigate("/admin"); // Quản trị viên -> Bảng điều khiển Admin
+        } else {
+          navigate("/"); // Người dùng thường -> Trang chủ
+        }
+
       } else {
         notification.error({
-          message: "Sign in failed",
-          description: "Invalid credentials or server rejected the request.",
+          message: "Đăng nhập thất bại",
+          description: "Tài khoản hoặc mật khẩu không chính xác.",
         });
       }
     } catch (err) {
       notification.error({
-        message: "Sign in failed",
+        message: "Đăng nhập thất bại",
         description:
           err?.response?.data?.message ||
-          "An error occurred. Please try again later.",
+          "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
       });
     } finally {
       setLoading(false);
@@ -79,7 +92,7 @@ const LoginPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập." }]}
           >
             <Input
-              // placeholder="e.g. admin"
+            
               autoComplete="username"
               onPressEnter={(e) =>
                 e.currentTarget.form?.dispatchEvent(
@@ -128,4 +141,5 @@ const LoginPage = () => {
     </div>
   );
 };
+
 export default LoginPage;

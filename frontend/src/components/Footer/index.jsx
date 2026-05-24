@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="footer">
-      <p>© 2025 Government Administration. All rights reserved.</p>
+      <p>Bản quyền © Thiết kế bởi Nhóm 10 - 2026</p>
     </footer>
   );
 };
