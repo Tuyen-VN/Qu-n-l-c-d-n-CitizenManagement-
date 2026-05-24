@@ -77,6 +77,7 @@ class DeathCertificateService {
           c.gender,
           dc.cause_of_death,
           dc.place_of_death,
+          dc.registrar_name,
           dc.created_at
         FROM DeathCertificates dc
         INNER JOIN Citizens c ON dc.citizen_id = c.citizen_id
@@ -120,7 +121,6 @@ class DeathCertificateService {
             DATEDIFF(YEAR, c.date_of_birth, dc.date_of_death) as age_at_death,
             c.gender,
             c.ethnicity,
-            c.nationality,
             c.permanent_address,
             w.ward_name,
             d.district_name,
@@ -177,6 +177,7 @@ class DeathCertificateService {
   async createDeathCertificate(certData, createdBy) {
     const pool = await getConnection();
     const transaction = pool.transaction();
+    let certId;
 
     try {
       await transaction.begin();
@@ -265,15 +266,15 @@ class DeathCertificateService {
             certificate_number, citizen_id, date_of_death, place_of_death,
             cause_of_death, burial_place, registrar_name, notes, created_by
           )
-          OUTPUT INSERTED.death_cert_id
           VALUES (
             @certificate_number, @citizen_id, @date_of_death, @place_of_death,
             @cause_of_death, @burial_place, @registrar_name, @notes, @created_by
-          )
+          );
+          SELECT SCOPE_IDENTITY() AS death_cert_id;
         `);
 
-      const certId = insertResult.recordset[0].death_cert_id;
-
+      certId = insertResult.recordset[0].death_cert_id; 
+      
       // Cap nhat trang thai cong dan thanh Deceased
       // (Trigger tu dong xu ly viec nay, nhung ta lam thu cong de dam bao)
       await transaction
@@ -302,12 +303,13 @@ class DeathCertificateService {
       await transaction.commit();
       logger.info(`Death certificate created: ${certId} by user ${createdBy}`);
 
-      return await this.getDeathCertificateById(certId);
+      
     } catch (error) {
       await transaction.rollback();
       logger.error('Create death certificate failed:', error);
       throw error;
     }
+    return await this.getDeathCertificateById(certId);
   }
 
   /**

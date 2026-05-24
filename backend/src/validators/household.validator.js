@@ -6,32 +6,32 @@ const { body, param, query } = require('express-validator');
 const createHouseholdValidation = [
   body('head_of_household_id')
     .notEmpty()
-    .withMessage('Chu ho la bat buoc')
+    .withMessage('CHủ hộ là bắt buộc')
     .isInt({ min: 1 })
-    .withMessage('Chu ho khong hop le'),
+    .withMessage('Chủ hộ không hợp lệ'),
 
   body('address')
     .trim()
     .notEmpty()
-    .withMessage('Dia chi la bat buoc')
+    .withMessage('Địa chỉ là bắt buộc')
     .isLength({ max: 255 })
-    .withMessage('Dia chi toi da 255 ky tu'),
+    .withMessage('Địa chỉ tối đa 255 ký tự'),
 
   body('ward_id')
     .notEmpty()
-    .withMessage('Phuong/xa la bat buoc')
+    .withMessage('Phường/xã là bắt buộc')
     .isInt({ min: 1 })
-    .withMessage('Phuong/xa khong hop le'),
+    .withMessage('Phường/xã không hợp lệ'),
 
   body('household_type')
     .optional()
     .isIn(['Thường trú', 'Tạm trú'])
-    .withMessage('Loai ho khau khong hop le'),
+    .withMessage('Loại hộ khẩu không hợp lệ'),
 
   body('notes')
     .optional()
     .isLength({ max: 500 })
-    .withMessage('Ghi chu toi da 500 ky tu'),
+    .withMessage('Ghi chú tối đa 500 ký tự'),
 ];
 
 /**
@@ -42,19 +42,19 @@ const updateHouseholdValidation = [
     .optional()
     .trim()
     .notEmpty()
-    .withMessage('Dia chi khong duoc rong')
+    .withMessage('Địa chỉ không được rỗng')
     .isLength({ max: 255 })
-    .withMessage('Dia chi toi da 255 ky tu'),
+    .withMessage('Địa chỉ tối đa 255 ký tự'),
 
   body('household_type')
     .optional()
     .isIn(['Thường trú', 'Tạm trú'])
-    .withMessage('Loai ho khau khong hop le'),
+    .withMessage('Loại hộ khẩu không hợp lệ'),
 
   body('notes')
     .optional()
     .isLength({ max: 500 })
-    .withMessage('Ghi chu toi da 500 ky tu'),
+    .withMessage('Ghi chú tối đa 500 ký tự'),
 ];
 
 /**
@@ -63,16 +63,16 @@ const updateHouseholdValidation = [
 const addMemberValidation = [
   body('citizen_id')
     .notEmpty()
-    .withMessage('ID cong dan la bat buoc')
+    .withMessage('ID công dân là bắt buộc')
     .isInt({ min: 1 })
-    .withMessage('ID cong dan khong hop le'),
+    .withMessage('ID công dân không hợp lệ'),
 
   body('relationship_to_head')
     .trim()
     .notEmpty()
-    .withMessage('Quan he voi chu ho la bat buoc')
+    .withMessage('Quan hệ với chủ hộ là bắt buộc')
     .isLength({ max: 50 })
-    .withMessage('Quan he toi da 50 ky tu'),
+    .withMessage('Quan hệ tối đa 50 ký tự'),
 ];
 
 /**
@@ -81,9 +81,9 @@ const addMemberValidation = [
 const changeHeadValidation = [
   body('new_head_citizen_id')
     .notEmpty()
-    .withMessage('ID chu ho moi la bat buoc')
+    .withMessage('ID chủ hộ mới là bắt buộc')
     .isInt({ min: 1 })
-    .withMessage('ID chu ho moi khong hop le'),
+    .withMessage('ID chủ hộ mới không hợp lệ'),
 ];
 
 /**
@@ -93,15 +93,15 @@ const transferHouseholdValidation = [
   body('new_address')
     .trim()
     .notEmpty()
-    .withMessage('Dia chi moi la bat buoc')
+    .withMessage('Địa chỉ mới là bắt buộc')
     .isLength({ max: 255 })
-    .withMessage('Dia chi toi da 255 ky tu'),
+    .withMessage('Địa chỉ tối đa 255 ký tự'),
 
   body('new_ward_id')
     .notEmpty()
-    .withMessage('Phuong/xa moi la bat buoc')
+    .withMessage('Phường/xã mới là bắt buộc')
     .isInt({ min: 1 })
-    .withMessage('Phuong/xa moi khong hop le'),
+    .withMessage('Phường/xã mới không hợp lệ'),
 ];
 
 /**
@@ -110,7 +110,7 @@ const transferHouseholdValidation = [
 const idParamValidation = [
   param('id')
     .isInt({ min: 1 })
-    .withMessage('ID khong hop le'),
+    .withMessage('ID không hợp lệ'),
 ];
 
 /**
@@ -119,7 +119,7 @@ const idParamValidation = [
 const citizenIdParamValidation = [
   param('citizenId')
     .isInt({ min: 1 })
-    .withMessage('Citizen ID khong hop le'),
+    .withMessage('Citizen ID không hợp lệ'),
 ];
 
 /**
@@ -129,27 +129,27 @@ const queryValidation = [
   query('page')
     .optional()
     .isInt({ min: 1 })
-    .withMessage('Trang phai la so nguyen duong'),
+    .withMessage('Trang phải là số nguyên dương'),
 
   query('pageSize')
     .optional()
     .isInt({ min: 1, max: 100 })
-    .withMessage('Kich thuoc trang phai tu 1-100'),
+    .withMessage('Kích thước trang phải từ 1-100'),
 
   query('wardId')
     .optional()
     .isInt({ min: 1 })
-    .withMessage('Ward ID khong hop le'),
+    .withMessage('Ward ID không hợp lệ'),
 
   query('minMembers')
     .optional()
     .isInt({ min: 1, max: 15 })
-    .withMessage('So thanh vien toi thieu phai tu 1-15'),
+    .withMessage('Số thành viên tối thiểu phải từ 1-15'),
 
   query('maxMembers')
     .optional()
     .isInt({ min: 1, max: 15 })
-    .withMessage('So thanh vien toi da phai tu 1-15'),
+    .withMessage('Số thành viên tối đa phải từ 1-15'),
 ];
 
 module.exports = {

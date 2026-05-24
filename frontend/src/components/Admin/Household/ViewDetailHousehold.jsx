@@ -29,11 +29,12 @@ import { deleteHouseholdMemberAPI } from "../../../services/api.service";
 const { Title, Text } = Typography;
 
 const ViewDetailHousehold = (props) => {
-  const { dataHousehold, dataHouseholdMembers, handleDelete } = props;
+  const { dataHousehold, dataHouseholdMembers, handleDelete, fetchHousehold } = props;
   // ===== Map chính xác theo payload bạn gửi =====
   const household = {
     number: dataHousehold?.household_code ?? "—",
-    address: dataHousehold?.address ?? "—",
+    // Uu tien permanent_address cua chu ho, fallback ve address cua household
+    address: dataHousehold?.head_permanent_address ?? dataHousehold?.address ?? "—",
     headOfHousehold: dataHousehold?.head_full_name ?? "—",
     // ghép vị trí: Phường - Quận/Huyện - Tỉnh/TP
     locationName:
@@ -82,9 +83,9 @@ const ViewDetailHousehold = (props) => {
   // Optional: after adding, you might want to refresh the detail/members list
   const handleMemberAdded = () => {
     // e.g., call a parent-provided fetch function if available
-    // fetchHousehold?.();
+     fetchHousehold?.();
     // or fetchMembers?.();
-    message.success("Đã cập nhật danh sách thành viên");
+    
   };
   const onDeleteMember = (memberId) => {
     Modal.confirm({
@@ -105,6 +106,7 @@ const ViewDetailHousehold = (props) => {
               message: "Xóa thành viên",
               description: "Thành viên đã được xóa thành công.",
             });
+            fetchHousehold?.();
             // refresh list if provided            handleMemberAdded?.();
           } else {
             const errMsg =
@@ -253,8 +255,13 @@ const ViewDetailHousehold = (props) => {
               <List
                 dataSource={dataHouseholdMembers}
                 locale={{ emptyText: "Chưa có thành viên" }}
-                renderItem={(m) => {
-                  const name = m.full_name ?? m.name ?? "—";
+                renderItem={(m) => { 
+                    const name = m.full_name ?? m.name ?? "—";                
+                    const genderRaw = m.gender ?? "";
+                    const gender = genderRaw === "Male" ? "Nam"
+                      : genderRaw === "Female" ? "Nữ"
+                      : genderRaw === "Other" ? "Khác"
+                      : genderRaw || "—";
                   const role =
                     m.relationship ??
                     m.relationship_to_head ??
@@ -263,20 +270,20 @@ const ViewDetailHousehold = (props) => {
                   const idNumber = m.citizen_code ?? m.idNumber ?? "—";
                   const dobRaw = m.date_of_birth ?? m.dateOfBirth ?? null;
                   const dob = dobRaw ? dayjs(dobRaw).format("DD/MM/YYYY") : "—";
-                  const gender = m.gender ?? "—";
+
 
                   return (
                     <List.Item
                       className="vd-member"
                       actions={[
-                        <Button
+                      <Button
                           key="delete"
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() =>
                             onDeleteMember(
-                              m.member_id ?? m.id ?? m.household_member_id
+                              m.citizen_id
                             )
                           }
                         />,

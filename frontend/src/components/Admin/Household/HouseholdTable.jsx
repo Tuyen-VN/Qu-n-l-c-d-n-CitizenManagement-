@@ -225,8 +225,9 @@ const HouseholdTable = () => {
       width: 250,
       ellipsis: true,
       render: (text, record) => {
-        // Lọc bỏ mã để chỉ hiện địa chỉ nhà
-        const cleanAddress = text?.replace(/^[A-Z0-9-]+(?:\s*-\s*)/, "") || "—";
+        // Uu tien permanent_address cua chu ho, fallback ve household.address
+        const displayAddress = record.head_permanent_address || text;
+        const cleanAddress = displayAddress?.replace(/^[A-Z0-9-]+(?:\s*-\s*)/, "") || "—";
         
         if (editingKey === record.household_id) {
           return (

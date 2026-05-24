@@ -119,8 +119,7 @@ class BirthCertificateService {
             bc.*,
             child.citizen_id AS child_id, child.citizen_code AS child_citizen_code,
             child.full_name AS child_name, child.date_of_birth AS child_dob,
-            child.gender AS child_gender, child.ethnicity AS child_ethnicity,
-            child.nationality AS child_nationality,
+            child.gender AS child_gender,
             father.citizen_id AS father_id, father.citizen_code AS father_citizen_code,
             father.full_name AS father_name, father.date_of_birth AS father_dob,
             mother.citizen_id AS mother_id, mother.citizen_code AS mother_citizen_code,
@@ -183,6 +182,9 @@ class BirthCertificateService {
     const pool = await getConnection();
     const transaction = pool.transaction();
 
+    // Khai báo ngoài try để dùng được sau khi commit
+    let certId;
+
     try {
       await transaction.begin();
 
@@ -214,7 +216,6 @@ class BirthCertificateService {
       }
 
       // ── 4. Sinh citizen_code và INSERT bản ghi Công dân mới ───────
-      // ward_id lấy từ nhân viên đang thực hiện (wardId truyền từ controller)
       const citizenCode = await this._generateCitizenCode(transaction);
 
       const citizenInsert = await transaction.request()
@@ -222,7 +223,7 @@ class BirthCertificateService {
         .input('full_name',     sql.NVarChar, certData.child_full_name)
         .input('date_of_birth', sql.Date,     certData.child_dob)
         .input('gender',        sql.NVarChar, certData.child_gender)
-        .input('ward_id',       sql.Int,      wardId || null)
+        .input('ward_id',       sql.Int,      wardId || 4)
         .input('status',        sql.NVarChar, 'Active')
         .input('is_active',     sql.Bit,      1)
         .input('created_by',    sql.Int,      createdBy)
@@ -256,7 +257,7 @@ class BirthCertificateService {
              @birth_place, @registrar_name, @notes, @created_by)
         `);
 
-      const certId = certInsert.recordset[0].birth_cert_id;
+      certId = certInsert.recordset[0].birth_cert_id;
 
       // ── 6. Tự động thêm trẻ vào hộ khẩu cha/mẹ ──────────────────
       const parentId = certData.father_citizen_id || certData.mother_citizen_id;
@@ -281,12 +282,15 @@ class BirthCertificateService {
       await transaction.commit();
       logger.info(`Birth cert created: certId=${certId}, childCitizenId=${childCitizenId}, citizenCode=${citizenCode}, by user=${createdBy}`);
 
-      return await this.getBirthCertificateById(certId);
     } catch (error) {
-      await transaction.rollback();
+      // Chỉ rollback khi transaction chưa commit
+      try { await transaction.rollback(); } catch (_) { /* transaction đã commit hoặc chưa begin */ }
       logger.error('Create birth certificate failed:', error);
       throw error;
     }
+
+    // Gọi NGOÀI try-catch của transaction: không bao giờ trigger rollback
+    return await this.getBirthCertificateById(certId);
   }
 
   /**
