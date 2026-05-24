@@ -29,16 +29,13 @@ const LoginPage = () => {
           description: "Chào mừng bạn quay lại hệ thống.",
         });
         
-        // Lưu thông tin vào Redux
+        // Lưu thông tin user vào Redux toàn cục
         dispatch(doLoginAction(res.data.user));
         
-        // KIỂM TRA ROLE ĐỂ ĐIỀU HƯỚNG
-        const role = res.data.user.role || res.data.user.role_name;
-        if (role === "Admin" || role === "ADMIN" || role === "Staff") {
-          navigate("/admin"); // Quản trị viên -> Bảng điều khiển Admin
-        } else {
-          navigate("/"); // Người dùng thường -> Trang chủ
-        }
+        // ĐÃ SỬA: Không đẩy thẳng vào /admin nữa. 
+        // Sau khi đăng nhập xong, luôn giữ người dùng ở lại trang chủ (/) 
+        // để họ sử dụng các chức năng khác của trang chủ nếu muốn.
+        navigate("/");
 
       } else {
         notification.error({
@@ -92,7 +89,6 @@ const LoginPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập." }]}
           >
             <Input
-            
               autoComplete="username"
               onPressEnter={(e) =>
                 e.currentTarget.form?.dispatchEvent(

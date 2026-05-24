@@ -31,7 +31,7 @@ const Header = () => {
   const items = [
     {
       key: "HomePage",
-      label: <Link to="/profile">Trang Chủ</Link>,
+      label: <Link to="/profile">Thông tin cá nhân</Link>,
     },
     // {
     //   key: "manageUser",

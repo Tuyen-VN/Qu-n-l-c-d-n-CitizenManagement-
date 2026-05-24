@@ -6,43 +6,82 @@ const logger = require('../utils/logger');
  * Middleware xac thuc JWT token
  */
 const verifyToken = (req, res, next) => {
+
   try {
+
     // Lay token tu header
+
     const authHeader = req.headers.authorization;
 
+
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+
       return unauthorizedResponse(res, 'Token khong hop le');
+
     }
+
+
 
     const token = authHeader.substring(7); // Bo 'Bearer '
 
+
+
     // Xac thuc token
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+
+
     // Gan thong tin user vao request
+
     req.user = {
+
       userId: decoded.userId,
+
       username: decoded.username,
+
       roleId: decoded.roleId,
+
       roleName: decoded.roleName,
+
       wardId: decoded.wardId,
+
     };
 
+
+
     next();
+
   } catch (error) {
+
     logger.error('Token verification failed:', error);
 
+
+
     if (error.name === 'TokenExpiredError') {
+
       return unauthorizedResponse(res, 'Token da het han');
+
     }
+
+
 
     if (error.name === 'JsonWebTokenError') {
+
       return unauthorizedResponse(res, 'Token khong hop le');
+
     }
 
+
+
     return unauthorizedResponse(res, 'Xac thuc that bai');
+
   }
-};
+
+}; 
+
+
 
 /**
  * Middleware phan quyen theo role

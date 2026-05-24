@@ -277,6 +277,8 @@ class DeathCertificateService {
       
       // Cap nhat trang thai cong dan thanh Deceased
       // (Trigger tu dong xu ly viec nay, nhung ta lam thu cong de dam bao)
+      // Cap nhat trang thai cong dan thanh Deceased (Chỉ đổi status, KHÔNG đổi is_active)
+      // Cap nhat trang thai cong dan thanh Deceased
       await transaction
         .request()
         .input('citizenId', sql.Int, certData.citizen_id)
@@ -395,6 +397,8 @@ class DeathCertificateService {
         .input('certId', sql.Int, certId)
         .query('DELETE FROM DeathCertificates WHERE death_cert_id = @certId');
 
+      // Khoi phuc trang thai cong dan (neu can)
+      // Khoi phuc trang thai cong dan (neu can)
       // Khoi phuc trang thai cong dan (neu can)
       await transaction
         .request()

@@ -1,13 +1,13 @@
-import { Col, Dropdown, Layout, Menu, message, Row } from "antd";
-const { Content, Footer, Sider } = Layout;
+import { Col, Dropdown, Layout, Menu, message, Row, Result, Button } from "antd";
 import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { FaBars } from "react-icons/fa";
 import { callLogout } from "../../services/api.service";
 import { doLogoutAction } from "../../redux/account/accountSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
+const { Content, Footer, Sider } = Layout;
 
 // import { callLogout } from "../../services/api.service";
 // import { doLogoutAction } from "../../redux/account/accountSlice";
@@ -100,7 +100,9 @@ const LayoutAdmin = () => {
   //   const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
   //     user?.avatar
   //   }`;
-  const role = "ADMIN";
+  const isAuthenticated = useSelector((state) => state.account.isAuthenticated);
+  const user = useSelector((state) => state.account.user);
+  const role = user?.role || user?.roleName;
 
   const location = useLocation();
 
@@ -117,10 +119,26 @@ const LayoutAdmin = () => {
       }
     }
   }, [location]);
+
+  if (!isAuthenticated) {
+    return (
+      <Result
+        status="403"
+        title="Yêu cầu đăng nhập"
+        subTitle="Vui lòng đăng nhập bằng tài khoản quản trị để truy cập trang này."
+        extra={
+          <Button type="primary" onClick={() => navigate("/login")}>
+            Đi đến Đăng nhập
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <>
       <Layout style={{ minHeight: "100vh" }}>
-        {role == "ADMIN" && (
+        {(role === "Admin" || role === "ADMIN" || role === "Staff") && (
           <Sider
             collapsible
             collapsed={collapsed}

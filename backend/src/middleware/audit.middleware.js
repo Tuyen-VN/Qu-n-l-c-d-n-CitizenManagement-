@@ -18,15 +18,22 @@ const logAudit = (action, tableName) => {
           const ipAddress = req.ip || req.connection.remoteAddress;
           const userAgent = req.get('user-agent');
 
-          // Lay record ID tu response data hoac params
+
           let recordId = null;
+
           if (body.data && body.data.citizen_id) {
+
             recordId = body.data.citizen_id;
+
           } else if (body.data && body.data.household_id) {
+
             recordId = body.data.household_id;
+
           } else if (req.params.id) {
+
             recordId = parseInt(req.params.id);
-          }
+
+          } 
 
           // Lay old value va new value
           const oldValue = req.oldValue || null; // Can set truoc do neu can
