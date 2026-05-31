@@ -86,12 +86,14 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
   // citizen_id (Form giữ string, submit convert Number)
   const citizenOptions = useMemo(
     () =>
-      citizens.map((c) => ({
-        value: String(c.citizen_id),
-        label: `${c.citizen_code} — ${c.full_name}${
-          c.phone ? " (" + c.phone + ")" : ""
-        }`,
-      })),
+      citizens
+        .filter((c) => c.status === "Active")
+        .map((c) => ({
+          value: String(c.citizen_id),
+          label: `${c.citizen_code} — ${c.full_name}${
+            c.phone ? " (" + c.phone + ")" : ""
+          }`,
+        })),
     [citizens]
   );
 
@@ -128,15 +130,22 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
         onClose && onClose();
         onCreated && onCreated();
       } else {
+        const errMsg =
+          res?.error?.message ||
+          res?.message ||
+          "Đã có lỗi xảy ra, vui lòng thử lại";
         notification.error({
-          message: "Đã có lỗi xảy ra",
-          description:
-            JSON.stringify(res?.error.message) || JSON.stringify(res?.details),
+          message: "Không thể tạo tạm vắng",
+          description: errMsg,
         });
       }
     } catch (e) {
       if (!e?.errorFields) {
-        message.error(e?.response?.data?.message || "Tạo tạm vắng thất bại");
+        const errMsg =
+          e?.response?.data?.error?.message ||
+          e?.response?.data?.message ||
+          "Tạo tạm vắng thất bại";
+        notification.error({ message: "Lỗi", description: errMsg });
       }
     } finally {
       setSubmitting(false);

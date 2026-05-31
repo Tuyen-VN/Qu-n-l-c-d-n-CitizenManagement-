@@ -36,7 +36,20 @@ const callLogout = () => {
 };
 
 const callListCitizensAPI = (query) => {
-  const URL_BACKEND = `api/citizens?${query}`;
+  let queryString = "";
+  if (typeof query === "string") {
+    queryString = query;
+  } else if (typeof query === "object" && query !== null) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        const paramKey = key === "search" ? "searchTerm" : key;
+        params.append(paramKey, val);
+      }
+    });
+    queryString = params.toString();
+  }
+  const URL_BACKEND = `api/citizens?${queryString}`;
   const res = axios.get(URL_BACKEND);
   return res;
 };

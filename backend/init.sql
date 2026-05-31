@@ -134,7 +134,7 @@ CREATE TABLE Households (
     FOREIGN KEY (head_of_household_id) REFERENCES Citizens(citizen_id),
     FOREIGN KEY (ward_id) REFERENCES Wards(ward_id),
     FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE SET NULL,
-    CHECK (member_count > 0 AND member_count <= 15)
+    CHECK (member_count >= 0 AND member_count <= 15)
 );
 
 -- BẢNG 8: HouseholdMembers (Thành viên hộ khẩu)
@@ -237,7 +237,7 @@ CREATE TABLE DeathCertificates (
     updated_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (citizen_id) REFERENCES Citizens(citizen_id),
     FOREIGN KEY (created_by) REFERENCES Users(user_id) ON DELETE SET NULL,
-    CHECK (date_of_death < GETDATE())
+    CHECK (date_of_death <= CAST(GETDATE() AS DATE))
 );
 
 -- BẢNG 13: RefreshTokens (JWT Token hệ thống)

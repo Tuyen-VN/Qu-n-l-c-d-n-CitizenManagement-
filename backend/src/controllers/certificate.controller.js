@@ -242,10 +242,17 @@ class DeathCertificateController {
       if (error.message.includes('da co giay khai tu')) {
         return conflictResponse(res, error.message);
       }
-      if (error.message.includes('khong ton tai') || error.message.includes('khong the') || error.message.includes('da duoc xac nhan')) {
+      if (
+        error.message.includes('khong ton tai') ||
+        error.message.includes('khong the') ||
+        error.message.includes('da duoc xac nhan') ||
+        error.message.includes('Ngay tu vong') ||
+        error.message.includes('Nguoi nay') ||
+        error.message.includes('Cong dan')
+      ) {
         return errorResponse(res, 'INVALID_DATA', error.message, 400);
       }
-      return errorResponse(res, 'CREATE_DEATH_CERT_FAILED', 'Cap giay khai tu that bai', 500);
+      return errorResponse(res, 'CREATE_DEATH_CERT_FAILED', error.message || 'Cap giay khai tu that bai', 500);
     }
   }
 

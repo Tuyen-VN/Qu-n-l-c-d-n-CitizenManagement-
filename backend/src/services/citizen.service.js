@@ -25,7 +25,7 @@ class CitizenService {
       request.input('pageSize', sql.Int, parseInt(pageSize));
       request.input('offset', sql.Int, offset);
 
-      let whereConditions = ['c.is_active = 1'];
+      let whereConditions = ["(c.is_active = 1 OR c.status = 'Deceased')"];
 
       if (searchTerm) {
         request.input('searchTerm', sql.NVarChar, `%${searchTerm}%`);

@@ -143,16 +143,24 @@ class TemporaryResidenceService {
         .request()
         .input('citizenId', sql.Int, tempResData.citizen_id)
         .query(`
-          SELECT citizen_id, full_name, status
+          SELECT citizen_id, full_name, status, is_active
           FROM Citizens
-          WHERE citizen_id = @citizenId AND is_active = 1
+          WHERE citizen_id = @citizenId
         `);
 
       if (citizenCheck.recordset.length === 0) {
         throw new Error('Cong dan khong ton tai');
       }
 
-      if (!['Active', 'Absent'].includes(citizenCheck.recordset[0].status)) {
+      const citizen = citizenCheck.recordset[0];
+
+      if (citizen.status === 'Deceased') {
+        throw new Error('Cong dan da mat, khong the dang ky tam tru');
+      }
+      if (!citizen.is_active) {
+        throw new Error('Cong dan khong con hoat dong trong he thong');
+      }
+      if (!['Active', 'Absent'].includes(citizen.status)) {
         throw new Error('Cong dan khong o trang thai hop le de dang ky tam tru');
       }
 

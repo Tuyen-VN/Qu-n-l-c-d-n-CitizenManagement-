@@ -202,15 +202,20 @@ const CitizensTable = () => {
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(r)}
+            disabled={r.status === "Deceased"}
           />
-          <Popconfirm
-            title="Xóa công dân"
-            description="Bạn có chắc chắn muốn xóa công dân này không?"
-            okType="danger"
-            onConfirm={() => handleDelete(r.citizen_id)}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          {r.status === "Deceased" ? (
+            <Button type="text" danger icon={<DeleteOutlined />} disabled />
+          ) : (
+            <Popconfirm
+              title="Xóa công dân"
+              description="Bạn có chắc chắn muốn xóa công dân này không?"
+              okType="danger"
+              onConfirm={() => handleDelete(r.citizen_id)}
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
