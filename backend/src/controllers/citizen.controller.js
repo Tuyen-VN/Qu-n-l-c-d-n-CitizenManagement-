@@ -24,6 +24,8 @@ class CitizenController {
         minAge,
         maxAge,
         status,
+        sortBy,
+        sortOrder,
       } = req.query;
 
       // Neu la Staff, chi lay du lieu cua Ward minh quan ly
@@ -41,6 +43,8 @@ class CitizenController {
         minAge,
         maxAge,
         status,
+        sortBy,
+        sortOrder,
       };
 
       const result = await citizenService.getCitizens(filters);

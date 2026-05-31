@@ -16,7 +16,9 @@ class CitizenService {
         gender = null,
         minAge = null,
         maxAge = null,
-        status = 'null',
+        status = null,
+        sortBy = null,
+        sortOrder = 'desc',
       } = filters;
 
       const offset = (page - 1) * pageSize;
@@ -44,12 +46,32 @@ class CitizenService {
         whereConditions.push('c.gender = @gender');
       }
 
-      if (status && status !== 'null') {
-        request.input('status', sql.NVarChar, status);
-        whereConditions.push('c.status = @status');
+      if (status && status !== 'null' && status !== 'undefined') {
+        const statusList = status.split(',').map(s => s.trim()).filter(Boolean);
+        if (statusList.length > 0) {
+          const conditions = [];
+          statusList.forEach((s, idx) => {
+            const paramName = `status_${idx}`;
+            request.input(paramName, sql.NVarChar, s);
+            conditions.push(`c.status = @${paramName}`);
+          });
+          whereConditions.push(`(${conditions.join(' OR ')})`);
+        }
       }
 
       const whereClause = whereConditions.join(' AND ');
+
+      // Build sorting
+      const allowedSortFields = {
+        full_name: 'c.full_name',
+        citizen_code: 'c.citizen_code',
+        date_of_birth: 'c.date_of_birth',
+        status: 'c.status',
+        created_at: 'c.created_at',
+      };
+
+      const sortColumn = allowedSortFields[sortBy] || 'c.created_at';
+      const sortDirection = (sortOrder?.toLowerCase() === 'asc' || sortOrder?.toLowerCase() === 'ascend') ? 'ASC' : 'DESC';
 
       // Lay tong so ban ghi
       const countQuery = `
@@ -83,7 +105,7 @@ class CitizenService {
         INNER JOIN Districts d ON w.district_id = d.district_id
         INNER JOIN Provinces p ON d.province_id = p.province_id
         WHERE ${whereClause}
-        ORDER BY c.created_at DESC
+        ORDER BY ${sortColumn} ${sortDirection}
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
       `;
