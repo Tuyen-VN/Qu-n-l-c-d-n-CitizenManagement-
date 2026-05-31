@@ -27,6 +27,9 @@ const UserProfile = () => {
 
   // Lay citizen tu Redux (duoc luu khi login)
   const citizen = useSelector((state) => state.account.user?.citizen ?? null);
+  const user = useSelector((state) => state.account.user);
+  const userRole = user?.role || accountInfo?.role_name || "";
+  const isAdminOrStaff = userRole === "Admin" || userRole === "ADMIN" || userRole === "Staff";
 
   useEffect(() => { getAccount(); }, []);
 
@@ -112,7 +115,7 @@ const UserProfile = () => {
             <Text type="secondary">Xem thông tin chi tiết về {accountInfo?.full_name}</Text>
           </div>
           <div className="header-actions">
-            {statusTag}
+            {isAdminOrStaff && statusTag}
             <Button type="primary" icon={<LockOutlined/>}
               onClick={() => { form.resetFields(); setShowChangePassword(true); }}>
               Đổi mật khẩu
@@ -121,104 +124,105 @@ const UserProfile = () => {
         </div>
 
         {/* ── Card 1: Thong tin tai khoan ── */}
-        <Card style={{ marginBottom: 16 }}>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={12}>
-              <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
-                <Descriptions.Item label="Mã người dùng">
-                  <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Tên đăng nhập">
-                  <UserOutlined /> {accountInfo?.username || "—"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Họ và tên">{accountInfo?.full_name || "—"}</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  <MailOutlined /> {accountInfo?.email || "—"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Số điện thoại">
-                  <PhoneOutlined /> {accountInfo?.phone || "—"}
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-
-            <Col xs={24} lg={12}>
-              <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
-                <Descriptions.Item label="Vai trò">
-                  <Tag color="processing">{accountInfo?.role_name || "—"}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="Mô tả vai trò">
-                  <Text type="secondary">{accountInfo?.role_description || "—"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Trạng thái">{statusTag}</Descriptions.Item>
-                <Descriptions.Item label="Đăng nhập gần nhất">
-                  <FieldTimeOutlined /> {fmt(accountInfo?.last_login)}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày tạo tài khoản">
-                  {fmt(accountInfo?.created_at)}
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-          </Row>
-        </Card>
-
-        {/* ── Card 2: Ho so cong dan (chi hien voi viewer co citizen trong Redux) ── */}
-        {citizen ? (
-          <Card>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-              <TeamOutlined style={{ fontSize:18, color:"#1890ff" }}/>
-              <Title level={5} style={{ margin:0 }}>Hồ Sơ Công Dân</Title>
-              <Tag color="blue">Phường Phúc Lợi</Tag>
-            </div>
-
+        {isAdminOrStaff && (
+          <Card style={{ marginBottom: 16 }}>
             <Row gutter={[24, 24]}>
               <Col xs={24} lg={12}>
-                <Descriptions title="Thông tin cơ bản" column={1} labelStyle={{ width: 180 }}>
-                  <Descriptions.Item label="Số CCCD">
-                    <Text strong><IdcardOutlined /> {citizen.citizen_code || "—"}</Text>
+                <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
+                  <Descriptions.Item label="Mã người dùng">
+                    <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
                   </Descriptions.Item>
-                  <Descriptions.Item label="Họ và tên">{citizen.citizen_full_name || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Ngày sinh">{fmtDate(citizen.date_of_birth)}</Descriptions.Item>
-                  <Descriptions.Item label="Giới tính">{citizen.gender || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Dân tộc">{citizen.ethnicity || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Nơi sinh">{citizen.place_of_birth || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Nghề nghiệp">{citizen.occupation || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Trạng thái cư trú">
-                    <Tag color={citizenStatusColor[citizen.citizen_status] ?? "default"}>
-                      {citizen.citizen_status || "—"}
-                    </Tag>
+                  <Descriptions.Item label="Tên đăng nhập">
+                    <UserOutlined /> {accountInfo?.username || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Họ và tên">{accountInfo?.full_name || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    <MailOutlined /> {accountInfo?.email || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số điện thoại">
+                    <PhoneOutlined /> {accountInfo?.phone || "—"}
                   </Descriptions.Item>
                 </Descriptions>
               </Col>
 
               <Col xs={24} lg={12}>
-                <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
-                  <Descriptions.Item label="Số điện thoại">
-                    <PhoneOutlined /> {citizen.citizen_phone || "—"}
+                <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
+                  <Descriptions.Item label="Vai trò">
+                    <Tag color="processing">{accountInfo?.role_name || "—"}</Tag>
                   </Descriptions.Item>
-                  <Descriptions.Item label="Email">
-                    <MailOutlined /> {citizen.citizen_email || "—"}
+                  <Descriptions.Item label="Mô tả vai trò">
+                    <Text type="secondary">{accountInfo?.role_description || "—"}</Text>
                   </Descriptions.Item>
-                  <Descriptions.Item label="Địa chỉ thường trú">
-                    <EnvironmentOutlined /> {citizen.permanent_address || "—"}
+                  <Descriptions.Item label="Trạng thái">{statusTag}</Descriptions.Item>
+                  <Descriptions.Item label="Đăng nhập gần nhất">
+                    <FieldTimeOutlined /> {fmt(accountInfo?.last_login)}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Khu vực">
-                    {[citizen.citizen_ward_name, citizen.citizen_district_name, citizen.citizen_province_name]
-                      .filter(Boolean).join(", ") || "—"}
+                  <Descriptions.Item label="Ngày tạo tài khoản">
+                    {fmt(accountInfo?.created_at)}
                   </Descriptions.Item>
                 </Descriptions>
               </Col>
             </Row>
           </Card>
-        ) : (
-          // Admin / Staff hoac viewer khong co citizen
-          <Card>
-            <Result
-              icon={<TeamOutlined style={{ color:"#bbb" }}/>}
-              title="Không có hồ sơ công dân"
-              subTitle="Tài khoản này không được liên kết với công dân trong hệ thống."
-              style={{ padding:"24px 0" }}
-            />
-          </Card>
+        )}
+
+        {/* ── Card 2: Ho so cong dan ── */}
+        {!isAdminOrStaff && (
+          citizen ? (
+            <Card>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
+                <TeamOutlined style={{ fontSize:18, color:"#1890ff" }}/>
+                <Title level={5} style={{ margin:0 }}>Hồ Sơ Công Dân</Title>
+                <Tag color="blue">Phường Phúc Lợi</Tag>
+              </div>
+
+              <Row gutter={[24, 24]}>
+                <Col xs={24} lg={12}>
+                  <Descriptions title="Thông tin cơ bản" column={1} labelStyle={{ width: 180 }}>
+                    <Descriptions.Item label="Số CCCD">
+                      <Text strong><IdcardOutlined /> {citizen.citizen_code || "—"}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Họ và tên">{citizen.citizen_full_name || "—"}</Descriptions.Item>
+                    <Descriptions.Item label="Ngày sinh">{fmtDate(citizen.date_of_birth)}</Descriptions.Item>
+                    <Descriptions.Item label="Giới tính">{citizen.gender || "—"}</Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái cư trú">
+                      <Tag color={citizenStatusColor[citizen.citizen_status] ?? "default"}>
+                        {citizen.citizen_status || "—"}
+                      </Tag>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Col>
+
+                <Col xs={24} lg={12}>
+                  <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
+                    <Descriptions.Item label="Số điện thoại">
+                      <PhoneOutlined /> {citizen.citizen_phone || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                      <MailOutlined /> {citizen.citizen_email || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ thường trú">
+                      <EnvironmentOutlined /> {citizen.permanent_address || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Khu vực">
+                      {[citizen.citizen_ward_name, citizen.citizen_district_name, citizen.citizen_province_name]
+                        .filter(Boolean).join(", ") || "—"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Col>
+              </Row>
+            </Card>
+          ) : (
+            // Admin / Staff hoac viewer khong co citizen
+            <Card>
+              <Result
+                icon={<TeamOutlined style={{ color:"#bbb" }}/>}
+                title="Không có hồ sơ công dân"
+                subTitle="Tài khoản này không được liên kết với công dân trong hệ thống."
+                style={{ padding:"24px 0" }}
+              />
+            </Card>
+          )
         )}
       </div>
 

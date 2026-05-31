@@ -321,7 +321,7 @@ VALUES (N'staff02',
 -- Viewer (role_id=3) - citizen_id sẽ được gán ở cuối file sau khi insert công dân
 INSERT INTO Users (username, password_hash, full_name, email, role_id, is_active)
 VALUES (N'viewer01',
-        N'$2a$12$m/pETcvT6F2stW5Oikc4m.DafCiK7TN3JEwuPs4bOJ1LTfGratlrC',
+        N'$2a$12$YDVsQMoGx0Gj0DWdGbmqYONa5JBwAsnyfNOefg7fY7jL5PzC0oZM2',
         N'Viewer 1', N'viewer01@citizen.gov.vn', 3, 1);
 GO
 
