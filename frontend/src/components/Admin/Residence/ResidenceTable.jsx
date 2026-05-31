@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Button, Card, Table, Tabs, Tag, Typography, message } from "antd";
-import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { ReloadOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import "../../../assets/styles/residenceTable.scss";
@@ -12,6 +12,7 @@ import {
 // === NEW: import 2 modal tạo mới ===
 import ResidenceCreateModal from "./ResidenceCreateModal";
 import AbsenceCreateModal from "./AbsenceCreateModal";
+import AbsenceReturnModal from "./AbsenceReturnModal";
 
 dayjs.locale("vi");
 const { Title, Text } = Typography;
@@ -42,6 +43,8 @@ const ResidenceTable = () => {
   // === NEW: state mở/đóng modal ===
   const [openCreateResidence, setOpenCreateResidence] = useState(false);
   const [openCreateAbsence, setOpenCreateAbsence] = useState(false);
+  const [openReturnAbsence, setOpenReturnAbsence] = useState(false);
+  const [selectedAbsence, setSelectedAbsence] = useState(null);
 
   // ===== API fetchers with query =====
   const fetchResidence = useCallback(async () => {
@@ -206,6 +209,7 @@ const ResidenceTable = () => {
     { title: "Lý do", dataIndex: "reason", key: "reason", width: 150 },
     { title: "Ngày bắt đầu", dataIndex: "start_date", key: "start_date", width: 110, render: fmt },
     { title: "Ngày về", dataIndex: "expected_return_date", key: "expected_return_date", width: 110, render: fmt },
+    { title: "Ngày về thực tế", dataIndex: "actual_return_date", key: "actual_return_date", width: 120, render: fmt },
     
     // ĐÃ SỬA LẠI LOGIC TÍNH NGÀY CÒN LẠI CHO TẠM VẮNG
     {
@@ -236,6 +240,28 @@ const ResidenceTable = () => {
         else if (s === "Extended") { color = "blue"; label = "Đã gia hạn"; }
         else if (s === "Returned") { color = "green"; label = "Đã về"; }
         return <Tag color={color} style={{ fontWeight: 600, borderRadius: '12px' }}>{label}</Tag>;
+      },
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      width: 110,
+      fixed: "right",
+      render: (_, record) => {
+        const canReturn = record.status !== "Returned";
+        return (
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            disabled={!canReturn}
+            onClick={() => {
+              setSelectedAbsence(record);
+              setOpenReturnAbsence(true);
+            }}
+          >
+            Sửa
+          </Button>
+        );
       },
     },
   ];
@@ -393,6 +419,18 @@ const ResidenceTable = () => {
         onCreated={() => {
           if (activeTab === "absence") fetchAbsence();
         }}
+      />
+
+      <AbsenceReturnModal
+        open={openReturnAbsence}
+        onClose={() => {
+          setOpenReturnAbsence(false);
+          setSelectedAbsence(null);
+        }}
+        onSaved={() => {
+          if (activeTab === "absence") fetchAbsence();
+        }}
+        absenceData={selectedAbsence}
       />
     </div>
   );

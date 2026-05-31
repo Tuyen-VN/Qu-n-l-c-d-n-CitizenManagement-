@@ -143,6 +143,12 @@ const createTemporaryAbsencesAPI = (data) => {
   return res;
 };
 
+const returnTemporaryAbsenceAPI = (id, actualReturnDate) => {
+  const URL_BACKEND = `api/temporary-absences/${id}/return`;
+  const res = axios.put(URL_BACKEND, { actual_return_date: actualReturnDate });
+  return res;
+};
+
 const callListUserAPI = (query) => {
   const URL_BACKEND = `/api/v1/user?${query}`;
   const res = axios.get(URL_BACKEND);
@@ -398,6 +404,7 @@ export {
   callListTemporaryAbsencesAPI,
   createTemporaryResidencesAPI,
   createTemporaryAbsencesAPI,
+  returnTemporaryAbsenceAPI,
   callListBirthCertificatesAPI,
   createBirthCertificateAPI,
   callListDeathCertificatesAPI,
