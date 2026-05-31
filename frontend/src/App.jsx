@@ -106,6 +106,7 @@ const App = () => {
           role: resUser.data.role_name,
           userId: resUser.data.user_id,
           username: resUser.data.username,
+          citizen:  resUser.data.citizen ?? null,
         };
         dispatch(doGetAccountAction({ user: dataUser }));
       }

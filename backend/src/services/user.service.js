@@ -103,15 +103,44 @@ class UserService {
   }
 
   /**
+   * Parse citizen_id tu username
+   * Quy uoc: "viewer01" -> 1, "viewer02" -> 2, "staff03" -> 3, ...
+   * Lay phan so o cuoi chuoi username
+   */
+  parseCitizenIdFromUsername(username) {
+    if (!username) return null;
+    const match = username.match(/(\d+)$/); // lay so o cuoi
+    if (!match) return null;
+    const num = parseInt(match[1], 10);
+    return isNaN(num) ? null : num;
+  }
+
+  /**
    * Lay thong tin chi tiet nguoi dung
+   * Tu dong JOIN Citizens neu username co so o cuoi (viewer01, staff02, ...)
    */
   async getUserById(userId) {
     try {
       const pool = await getConnection();
 
+      // Lay thong tin user truoc de co username
+      const userResult = await pool
+        .request()
+        .input('userId', sql.Int, userId)
+        .query(`SELECT username FROM Users WHERE user_id = @userId`);
+
+      if (userResult.recordset.length === 0) {
+        throw new Error('Khong tim thay nguoi dung');
+      }
+
+      const username = userResult.recordset[0].username;
+      const citizenId = this.parseCitizenIdFromUsername(username);
+
+      // Query chinh: JOIN Citizens neu co citizenId tuong ung
       const result = await pool
         .request()
         .input('userId', sql.Int, userId)
+        .input('citizenId', sql.Int, citizenId ?? -1) // -1 dam bao LEFT JOIN tra NULL neu khong co
         .query(`
           SELECT
             u.user_id,
@@ -132,12 +161,33 @@ class UserService {
             u.is_active,
             u.last_login,
             u.created_at,
-            u.updated_at
+            u.updated_at,
+            -- Thong tin cong dan (neu username co so cuoi hop le)
+            c.citizen_id,
+            c.citizen_code,
+            c.full_name       AS citizen_full_name,
+            c.date_of_birth,
+            c.gender,
+            c.place_of_birth,
+            c.ethnicity,
+            c.occupation,
+            c.phone           AS citizen_phone,
+            c.email           AS citizen_email,
+            c.permanent_address,
+            c.status          AS citizen_status,
+            cw.ward_name      AS citizen_ward_name,
+            cd.district_name  AS citizen_district_name,
+            cp.province_name  AS citizen_province_name
           FROM Users u
           INNER JOIN Roles r ON u.role_id = r.role_id
           LEFT JOIN Wards w ON u.ward_id = w.ward_id
           LEFT JOIN Districts d ON w.district_id = d.district_id
           LEFT JOIN Provinces p ON d.province_id = p.province_id
+          -- JOIN Citizens theo so parse tu username
+          LEFT JOIN Citizens c ON c.citizen_id = @citizenId
+          LEFT JOIN Wards cw ON c.ward_id = cw.ward_id
+          LEFT JOIN Districts cd ON cw.district_id = cd.district_id
+          LEFT JOIN Provinces cp ON cd.province_id = cp.province_id
           WHERE u.user_id = @userId
         `);
 

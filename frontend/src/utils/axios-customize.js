@@ -1,93 +1,128 @@
 import axios from "axios";
-import { Mutex } from "async-mutex";
 
-const mutex = new Mutex();
-const baseURL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080";
 
 const instance = axios.create({
-  baseURL: baseURL,
-  withCredentials: true, // xét cookie
+  baseURL: BACKEND_URL,
+  timeout: 15000,
 });
 
-instance.defaults.headers.common = {
-  Authorization: `Bearer ${localStorage.getItem("access_token")} `,
+// Trang thai refresh de tranh goi nhieu lan cung luc
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : resolve(token)
+  );
+  failedQueue = [];
 };
 
-const handleRefreshToken = async () => {
-  // const refreshToken = localStorage.getItem("refresh_token");
-  // const res = await instance.post("/api/auth/refresh", { refreshToken });
-  // if (res && res?.data) return res.data.accessToken;
-  // return null;
-
-  return await mutex.runExclusive(async () => {
-    const refreshToken = localStorage.getItem("refresh_token");
-    const res = await instance.post("/api/auth/refresh", { refreshToken });
-    if (res && res?.data) return res.data.accessToken;
-    return null;
-  });
-};
-
-// Add a request interceptor
+// Gan access token vao moi request
 instance.interceptors.request.use(
-  function (config) {
-    // Do something before request is sent
-    if (
-      typeof window !== "undefined" &&
-      window &&
-      window.localStorage &&
-      window.localStorage.getItem("access_token")
-    ) {
-      config.headers.Authorization =
-        "Bearer " + window.localStorage.getItem("access_token");
+  (config) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
-  function (error) {
-    // Do something with request error
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-const NO_RETRY_HEADER = "x-no-retry";
-
-// Add a response interceptor
+// Xu ly response: unwrap data + tu dong refresh khi 401
 instance.interceptors.response.use(
-  function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response && response.data ? response.data : response;
-  },
-  async function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    if (
-      error.config &&
-      error.response &&
-      +error.response.status === 401 &&
-      !error.config.headers[NO_RETRY_HEADER]
-    ) {
-      // await handleRefreshToken();
-      const access_token = await handleRefreshToken();
-      error.config.headers[NO_RETRY_HEADER] = "true";
-      if (access_token) {
-        error.config.headers["Authorization"] = `Bearer ${access_token} `;
-        localStorage.setItem("access_token", access_token);
-        return axios.request(error.config);
-        // return instance.request(originalRequest);
-      }
+  (response) => response.data, // Giu nguyen nhu cu
+
+  async (error) => {
+    const originalRequest = error.config;
+    const status = error.response?.status;
+
+    // Chi xu ly 401, khong loop
+    if (status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
     }
 
-    // if (
-    //   error.config &&
-    //   error.response &&
-    //   +error.response.status === 500 &&
-    //   error.config.url === "/api/auth/refresh"
-    // ) {
-    //   window.location.href = "/login";
-    // }
+    // Chinh request refresh bi 401 → logout han
+    if (originalRequest.url?.includes("/api/auth/refresh")) {
+      _forceLogout();
+      return Promise.reject(error);
+    }
 
-    // console.log(error);
-    return error?.response.data ?? Promise.reject(error);
+    // Dang co request khac refresh → xep hang cho
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then((newToken) => {
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        return instance(originalRequest);
+      });
+    }
+
+    // Bat dau refresh
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (!refreshToken) throw new Error("No refresh token");
+
+      // Goi thang axios goc (khong qua instance) de tranh interceptor loop
+      // Dung field "refreshToken" camelCase - khop voi auth.validator.js
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/auth/refresh`,
+        { refreshToken },
+        { timeout: 10000 }
+      );
+
+      // Backend tra: { success, data: { accessToken, refreshToken } }
+      const newAccessToken = data?.data?.accessToken;
+      const newRefreshToken = data?.data?.refreshToken;
+
+      if (!newAccessToken) throw new Error("Khong nhan duoc access token moi");
+
+      // Luu ca 2 token moi
+      localStorage.setItem("access_token", newAccessToken);
+      if (newRefreshToken) {
+        localStorage.setItem("refresh_token", newRefreshToken);
+      }
+
+      instance.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+
+      // Cho cac request dang cho chay lai
+      processQueue(null, newAccessToken);
+
+      // Retry request bi loi
+      originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+      return instance(originalRequest);
+
+    } catch (refreshError) {
+      processQueue(refreshError, null);
+      _forceLogout();
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
+
+function _forceLogout() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+
+  // Dispatch Redux logout (dynamic import tranh circular dependency)
+  Promise.all([
+    import("../redux/store"),
+    import("../redux/account/accountSlice"),
+  ])
+    .then(([{ default: store }, { doLogoutAction }]) => {
+      store.dispatch(doLogoutAction());
+    })
+    .catch(() => {});
+
+  if (!window.location.pathname.includes("/login")) {
+    window.location.href = "/login";
+  }
+}
+
 export default instance;
