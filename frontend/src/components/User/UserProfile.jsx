@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Button, Card, Descriptions, Divider, Form, Input,
+  Button, Card, Descriptions, Form, Input,
   Modal, Result, Row, Col, Skeleton, Tag, Typography, message,
 } from "antd";
 import {
@@ -57,6 +57,14 @@ const UserProfile = () => {
   const citizenStatusColor = {
     Active:"success", Inactive:"default",
     Moved:"warning",  Deceased:"error", Absent:"gold",
+  };
+
+  const citizenStatusLabel = {
+    Active:   "Thường trú",
+    Inactive: "Không hoạt động",
+    Moved:    "Đã chuyển đi",
+    Deceased: "Đã mất",
+    Absent:   "Vắng mặt",
   };
 
   const statusTag = accountInfo?.is_active
@@ -120,48 +128,7 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* ── Card 1: Thong tin tai khoan ── */}
-        <Card style={{ marginBottom: 16 }}>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={12}>
-              <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
-                <Descriptions.Item label="Mã người dùng">
-                  <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Tên đăng nhập">
-                  <UserOutlined /> {accountInfo?.username || "—"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Họ và tên">{accountInfo?.full_name || "—"}</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  <MailOutlined /> {accountInfo?.email || "—"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Số điện thoại">
-                  <PhoneOutlined /> {accountInfo?.phone || "—"}
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-
-            <Col xs={24} lg={12}>
-              <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
-                <Descriptions.Item label="Vai trò">
-                  <Tag color="processing">{accountInfo?.role_name || "—"}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="Mô tả vai trò">
-                  <Text type="secondary">{accountInfo?.role_description || "—"}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Trạng thái">{statusTag}</Descriptions.Item>
-                <Descriptions.Item label="Đăng nhập gần nhất">
-                  <FieldTimeOutlined /> {fmt(accountInfo?.last_login)}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày tạo tài khoản">
-                  {fmt(accountInfo?.created_at)}
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-          </Row>
-        </Card>
-
-        {/* ── Card 2: Ho so cong dan (chi hien voi viewer co citizen trong Redux) ── */}
+        {/* ── Card: Ho so cong dan ── */}
         {citizen ? (
           <Card>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
@@ -179,12 +146,9 @@ const UserProfile = () => {
                   <Descriptions.Item label="Họ và tên">{citizen.citizen_full_name || "—"}</Descriptions.Item>
                   <Descriptions.Item label="Ngày sinh">{fmtDate(citizen.date_of_birth)}</Descriptions.Item>
                   <Descriptions.Item label="Giới tính">{citizen.gender || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Dân tộc">{citizen.ethnicity || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Nơi sinh">{citizen.place_of_birth || "—"}</Descriptions.Item>
-                  <Descriptions.Item label="Nghề nghiệp">{citizen.occupation || "—"}</Descriptions.Item>
                   <Descriptions.Item label="Trạng thái cư trú">
                     <Tag color={citizenStatusColor[citizen.citizen_status] ?? "default"}>
-                      {citizen.citizen_status || "—"}
+                      {citizenStatusLabel[citizen.citizen_status] ?? citizen.citizen_status ?? "—"}
                     </Tag>
                   </Descriptions.Item>
                 </Descriptions>
