@@ -89,7 +89,7 @@ CREATE TABLE Citizens (
     citizen_code NVARCHAR(20) NOT NULL UNIQUE, -- CCCD
     full_name NVARCHAR(100) NOT NULL,
     date_of_birth DATE NOT NULL,
-    gender NVARCHAR(10) NOT NULL CHECK (gender IN (N'Nam', N'Nữ', N'Khác')), -- Đồng nhất Tiếng Việt
+    gender NVARCHAR(10) NOT NULL CHECK (gender IN ('Male', 'Female', 'Other')), -- Đồng nhất Tiếng Việt
     place_of_birth NVARCHAR(255),
     ethnicity NVARCHAR(50) DEFAULT N'Kinh',
     occupation NVARCHAR(100),

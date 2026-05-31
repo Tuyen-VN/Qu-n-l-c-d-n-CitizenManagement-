@@ -8,7 +8,7 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "CitizenPass123!"
     ports:
-      - "1433:1433"
+      - "1434:1433"
     volumes:
       - mssql_data:/var/opt/mssql
     healthcheck:
