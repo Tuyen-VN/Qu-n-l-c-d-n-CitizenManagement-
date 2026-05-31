@@ -73,6 +73,7 @@ CREATE TABLE Users (
     phone NVARCHAR(20),
     role_id INT NOT NULL,
     ward_id INT, -- Tổ dân phố quản lý
+    citizen_id INT NULL, -- FK gán sau khi bảng Citizens tồn tại
     is_active BIT DEFAULT 1,
     last_login DATETIME,
     created_at DATETIME DEFAULT GETDATE(),
@@ -108,6 +109,12 @@ CREATE TABLE Citizens (
     CHECK (LEN(citizen_code) >= 9),
     CHECK (date_of_birth < GETDATE())
 );
+
+-- Thêm FK citizen_id vào Users SAU KHI Citizens đã tồn tại
+ALTER TABLE Users
+ADD CONSTRAINT FK_Users_Citizens
+    FOREIGN KEY (citizen_id) REFERENCES Citizens(citizen_id) ON DELETE SET NULL;
+GO
 
 -- BẢNG 7: Households (Hộ khẩu)
 CREATE TABLE Households (
@@ -262,6 +269,7 @@ CREATE TABLE AuditLogs (
 
 -- Tạo Index tăng tốc truy vấn hệ thống
 CREATE INDEX IX_Users_Username ON Users(username);
+CREATE INDEX IX_Users_CitizenId ON Users(citizen_id);
 CREATE INDEX IX_Citizens_CitizenCode ON Citizens(citizen_code);
 CREATE INDEX IX_Citizens_FullName ON Citizens(full_name);
 CREATE INDEX IX_Households_HouseholdCode ON Households(household_code);
@@ -292,14 +300,29 @@ INSERT INTO Wards (ward_code, ward_name, district_id) VALUES
 (N'PL-TO-04', N'Tổ 4', 1);
 
 -- Tạo các tài khoản quản trị hệ thống mẫu (Password gốc: Admin@123 / Staff@123 / Viewer@123)
-INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, is_active) VALUES 
-(N'admin', N'$2a$12$YDVsQMoGx0Gj0DWdGbmqYONa5JBwAsnyfNOefg7fY7jL5PzC0oZM2', N'Administrator', N'admin@citizen.gov.vn', N'0123456789', 1, 1);
+-- Admin (role_id=1, không thuộc tổ nào)
+INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, is_active)
+VALUES (N'admin',
+        N'$2a$12$YDVsQMoGx0Gj0DWdGbmqYONa5JBwAsnyfNOefg7fY7jL5PzC0oZM2',
+        N'Administrator', N'admin@citizen.gov.vn', N'0123456789', 1, 1);
 
-INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, ward_id, is_active) VALUES 
-(N'staff01', N'$2a$12$m/pETcvT6F2stW5Oikc4m.DafCiK7TN3JEwuPs4bOJ1LTfGratlrC', N'Nguyễn Văn A', N'nguyenvana@citizen.gov.vn', N'0987654321', 2, 1, 1);
+-- Staff Tổ 1 (role_id=2, ward_id=1)
+INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, ward_id, is_active)
+VALUES (N'staff01',
+        N'$2a$12$m/pETcvT6F2stW5Oikc4m.DafCiK7TN3JEwuPs4bOJ1LTfGratlrC',
+        N'Nguyễn Văn A', N'nguyenvana@citizen.gov.vn', N'0987654321', 2, 1, 1);
 
-INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, ward_id, is_active) VALUES 
-(N'viewer01', N'$2b$10$X.wS1Djoonr3Qc91GUcouet5FtOFNeI8vvZ4spqKTc8Ndz9nM28yy', N'Nguyễn Văn B', N'nguyenvanb@citizen.gov.vn', N'0123456780', 3, 1, 1);
+-- Staff Tổ 2 (role_id=2, ward_id=2)
+INSERT INTO Users (username, password_hash, full_name, email, phone, role_id, ward_id, is_active)
+VALUES (N'staff02',
+        N'$2a$12$m/pETcvT6F2stW5Oikc4m.DafCiK7TN3JEwuPs4bOJ1LTfGratlrC',
+        N'Trần Thị B', N'tranthib@citizen.gov.vn', N'0976543210', 2, 2, 1);
+
+-- Viewer (role_id=3) - citizen_id sẽ được gán ở cuối file sau khi insert công dân
+INSERT INTO Users (username, password_hash, full_name, email, role_id, is_active)
+VALUES (N'viewer01',
+        N'$2a$12$m/pETcvT6F2stW5Oikc4m.DafCiK7TN3JEwuPs4bOJ1LTfGratlrC',
+        N'Viewer 1', N'viewer01@citizen.gov.vn', 3, 1);
 GO
 
 -- ============================================================================
@@ -560,4 +583,15 @@ SET @h_id = SCOPE_IDENTITY();
 
 INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) 
 VALUES (@h_id, @c_id, N'Chủ hộ tạm trú');
+GO
+
+-- ============================================================================
+-- 6. GÁN citizen_id CHO VIEWER01 → công dân đầu tiên (citizen_id = 1)
+-- ============================================================================
+UPDATE Users
+SET citizen_id = 1
+WHERE username = 'viewer01';
+GO
+
+PRINT N'=== Hoàn tất! Dữ liệu mẫu đã được nạp thành công. ===';
 GO
