@@ -1,33 +1,6 @@
 import axios from "../utils/axios-customize";
 
-// =====================================================================
-// ĐOẠN CODE ĐÁNH CHẶN LỖI 401 (TOKEN HẾT HẠN)
-// =====================================================================
-axios.interceptors.response.use(
-  (response) => {
-    // API thành công, cho đi qua bình thường
-    return response;
-  },
-  (error) => {
-    // Nếu lỗi trả về là 401 (Unauthorized - Hết hạn token hoặc không hợp lệ)
-    if (error.response && error.response.status === 401) {
-      console.warn("Token đã hết hạn, hệ thống đang tự động đăng xuất...");
-      
-      // Xóa token cũ trong Local Storage
-      // LƯU Ý: Đổi "access_token" thành đúng cái tên mà bạn đã dùng để lưu token lúc đăng nhập nhé!
-      localStorage.removeItem("access_token"); 
-      
-      // Thông báo cho người dùng
-      alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
 
-      // Đá về trang login
-      window.location.href = "/login";
-    }
-    
-    return Promise.reject(error);
-  }
-);
-// =====================================================================
 
 const loginUserAPI = (username, password) => {
   const URL_BACKEND = "/api/auth/login";
@@ -57,7 +30,9 @@ const callChangePassword = (data) => {
 
 const callLogout = () => {
   const URL_BACKEND = "/api/auth/logout";
-  return axios.post(URL_BACKEND);
+  const refreshToken = localStorage.getItem("refresh_token");
+  // Gui refreshToken de backend revoke trong DB (fix: truoc day khong gui)
+  return axios.post(URL_BACKEND, { refreshToken });
 };
 
 const callListCitizensAPI = (query) => {
@@ -75,13 +50,16 @@ const callListWardAPI = () => {
 const createCitizenAPI = (data) => {
   const URL_BACKEND = "/api/citizens";
   return axios.post(URL_BACKEND, data).catch(error => {
+    // Return error response để frontend có thể xử lý
     return error.response || error;
   });
 };
 
 const updateCitizenAPI = (id, data) => {
   const URL_BACKEND = `/api/citizens/${id}`;
+
   return axios.put(URL_BACKEND, data).catch(error => {
+    // Return error response để frontend có thể xử lý
     return error.response || error;
   });
 };
@@ -425,4 +403,5 @@ export {
   callListDeathCertificatesAPI,
   createDeathCertificateAPI,
 };
+
 

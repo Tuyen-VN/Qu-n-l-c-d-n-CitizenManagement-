@@ -1,371 +1,255 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
-  Button,
-  Card,
-  Descriptions,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Result,
-  Row,
-  Col,
-  Skeleton,
-  Tag,
-  Typography,
-  message,
+  Button, Card, Descriptions, Divider, Form, Input,
+  Modal, Result, Row, Col, Skeleton, Tag, Typography, message,
 } from "antd";
 import {
-  LockOutlined,
-  ReloadOutlined,
-  UserOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  EnvironmentOutlined,
-  IdcardOutlined,
-  FieldTimeOutlined,
-  CheckCircleTwoTone,
-  CloseCircleTwoTone,
+  LockOutlined, ReloadOutlined, UserOutlined, MailOutlined,
+  PhoneOutlined, EnvironmentOutlined, IdcardOutlined,
+  FieldTimeOutlined, CheckCircleTwoTone, CloseCircleTwoTone,
+  TeamOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import "../../assets/styles/userProfile.scss";
-import {
-  callChangePassword,
-  callFetchAccount,
-  callUserById,
-} from "../../services/api.service";
+import { useSelector } from "react-redux";
+import { callChangePassword, callFetchAccount, callUserById } from "../../services/api.service";
 
 dayjs.locale("vi");
 const { Title, Text } = Typography;
 
 const UserProfile = () => {
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
+  const [loading, setLoading]               = useState(true);
+  const [fetchError, setFetchError]         = useState("");
   const [showChangePassword, setShowChangePassword] = useState(false);
-
-  const [personalInfo, setPersonalInfo] = useState({
-    user_id: null,
-    username: "",
-    full_name: "",
-    email: "",
-    phone: "",
-    role_id: null,
-    role_name: "",
-    role_description: "",
-    ward_id: null,
-    ward_name: "",
-    ward_code: "",
-    district_name: "",
-    district_code: "",
-    province_name: "",
-    province_code: "",
-    is_active: true,
-    last_login: null,
-    created_at: "",
-    updated_at: "",
-  });
-
+  const [accountInfo, setAccountInfo]       = useState(null);
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    getAccount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Lay citizen tu Redux (duoc luu khi login)
+  const citizen = useSelector((state) => state.account.user?.citizen ?? null);
+
+  useEffect(() => { getAccount(); }, []);
 
   const getAccount = async () => {
     try {
       setLoading(true);
       setFetchError("");
       const res = await callFetchAccount();
-      console.log(res);
       if (res?.data?.userId) {
         const detail = await callUserById(res.data.userId);
-        console.log("detail ", detail);
-        if (detail?.data) setPersonalInfo(detail.data);
+        if (detail?.data) setAccountInfo(detail.data);
       } else {
         setFetchError("Không thể xác định tài khoản hiện tại.");
       }
     } catch (e) {
       setFetchError("Không thể tải thông tin người dùng.");
-      // eslint-disable-next-line no-console
-      console.error("Error fetching account:", e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "Chưa cập nhật";
-    const d = dayjs(dateString).subtract(7, "hour"); // trừ 7h
-    return d.isValid() ? d.format("HH:mm DD/MM/YYYY") : "Chưa cập nhật";
+  const fmt     = (d) => d && dayjs(d).subtract(7,"hour").isValid()
+    ? dayjs(d).subtract(7,"hour").format("HH:mm DD/MM/YYYY") : "Chưa cập nhật";
+  const fmtDate = (d) => d && dayjs(d).isValid()
+    ? dayjs(d).format("DD/MM/YYYY") : "—";
+
+  const citizenStatusColor = {
+    Active:"success", Inactive:"default",
+    Moved:"warning",  Deceased:"error", Absent:"gold",
   };
 
-  const fullAddress = useMemo(() => {
-    const parts = [
-      personalInfo.ward_name,
-      personalInfo.district_name,
-      personalInfo.province_name,
-    ].filter(Boolean);
-    return parts.join(", ") || "Chưa cập nhật";
-  }, [personalInfo]);
+  const statusTag = accountInfo?.is_active
+    ? <Tag icon={<CheckCircleTwoTone twoToneColor="#52c41a"/>} color="success">Hoạt động</Tag>
+    : <Tag icon={<CloseCircleTwoTone  twoToneColor="#ff4d4f"/>} color="error">Không hoạt động</Tag>;
 
-  const statusTag = personalInfo.is_active ? (
-    <Tag icon={<CheckCircleTwoTone twoToneColor="#52c41a" />} color="success">
-      Hoạt động
-    </Tag>
-  ) : (
-    <Tag icon={<CloseCircleTwoTone twoToneColor="#ff4d4f" />} color="error">
-      Không hoạt động
-    </Tag>
-  );
-
-  const handleOpenChangePassword = () => {
-    form.resetFields();
-    setShowChangePassword(true);
-  };
-
-  const onSubmitChangePassword = async () => {
+  const onChangePassword = async () => {
     try {
       const values = await form.validateFields();
-      const payload = {
-        oldPassword: values.oldPassword,
-        newPassword: values.newPassword,
+      const res = await callChangePassword({
+        oldPassword:     values.oldPassword,
+        newPassword:     values.newPassword,
         confirmPassword: values.confirmPassword,
-      };
-
-      const res = await callChangePassword(payload);
-      if (res && res.success === true) {
+      });
+      if (res?.success) {
         message.success("Đổi mật khẩu thành công!");
         setShowChangePassword(false);
       } else {
-        message.error(
-          res?.details
-            ? `Đổi mật khẩu thất bại: ${JSON.stringify(res.details)}`
-            : "Đổi mật khẩu thất bại. Vui lòng thử lại."
-        );
+        message.error("Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.");
       }
     } catch (e) {
-      // validateFields error hoặc API throw
-      if (e?.errorFields) return; // lỗi validate -> đã hiển thị
-      message.error(
-        "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại."
-      );
-      // eslint-disable-next-line no-console
-      console.error("Error changing password:", e);
+      if (e?.errorFields) return;
+      message.error("Vui lòng kiểm tra lại mật khẩu hiện tại.");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="user-profile-page">
-        <div className="container">
-          <Card>
-            <Skeleton active paragraph={{ rows: 6 }} />
-          </Card>
-        </div>
+  if (loading) return (
+    <div className="user-profile-page">
+      <div className="container">
+        <Card><Skeleton active paragraph={{ rows: 8 }}/></Card>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (fetchError) {
-    return (
-      <div className="user-profile-page">
-        <div className="container">
-          <Result
-            status="warning"
-            title="Lỗi tải dữ liệu"
-            subTitle={fetchError}
-            extra={
-              <Button
-                icon={<ReloadOutlined />}
-                type="primary"
-                onClick={getAccount}
-              >
-                Thử lại
-              </Button>
-            }
-          />
-        </div>
+  if (fetchError) return (
+    <div className="user-profile-page">
+      <div className="container">
+        <Result status="warning" title="Lỗi tải dữ liệu" subTitle={fetchError}
+          extra={<Button icon={<ReloadOutlined/>} type="primary" onClick={getAccount}>Thử lại</Button>}
+        />
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="user-profile-page">
       <div className="container">
+
+        {/* Header */}
         <div className="page-header">
           <div>
-            <Title level={2} style={{ margin: 0 }}>
-              Hồ Sơ Cá Nhân
-            </Title>
-            <Text type="secondary">
-              Xem thông tin chi tiết về {personalInfo.full_name}
-            </Text>
+            <Title level={2} style={{ margin: 0 }}>Hồ Sơ Cá Nhân</Title>
+            <Text type="secondary">Xem thông tin chi tiết về {accountInfo?.full_name}</Text>
           </div>
           <div className="header-actions">
             {statusTag}
-            <Button
-              type="primary"
-              icon={<LockOutlined />}
-              onClick={handleOpenChangePassword}
-            >
+            <Button type="primary" icon={<LockOutlined/>}
+              onClick={() => { form.resetFields(); setShowChangePassword(true); }}>
               Đổi mật khẩu
             </Button>
           </div>
         </div>
 
-        <Card>
+        {/* ── Card 1: Thong tin tai khoan ── */}
+        <Card style={{ marginBottom: 16 }}>
           <Row gutter={[24, 24]}>
             <Col xs={24} lg={12}>
-              <Descriptions
-                title="Thông tin cơ bản"
-                column={1}
-                labelStyle={{ width: 180 }}
-              >
+              <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
                 <Descriptions.Item label="Mã người dùng">
-                  <Text strong>
-                    <IdcardOutlined /> #{personalInfo.user_id}
-                  </Text>
+                  <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
                 </Descriptions.Item>
                 <Descriptions.Item label="Tên đăng nhập">
-                  <UserOutlined /> {personalInfo.username || "—"}
+                  <UserOutlined /> {accountInfo?.username || "—"}
                 </Descriptions.Item>
-                <Descriptions.Item label="Họ và tên">
-                  {personalInfo.full_name || "—"}
-                </Descriptions.Item>
+                <Descriptions.Item label="Họ và tên">{accountInfo?.full_name || "—"}</Descriptions.Item>
                 <Descriptions.Item label="Email">
-                  <MailOutlined /> {personalInfo.email || "—"}
+                  <MailOutlined /> {accountInfo?.email || "—"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Số điện thoại">
-                  <PhoneOutlined /> {personalInfo.phone || "—"}
+                  <PhoneOutlined /> {accountInfo?.phone || "—"}
                 </Descriptions.Item>
               </Descriptions>
             </Col>
 
             <Col xs={24} lg={12}>
-              <Descriptions
-                title="Vai trò & Trạng thái"
-                column={1}
-                labelStyle={{ width: 180 }}
-              >
+              <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
                 <Descriptions.Item label="Vai trò">
-                  <Tag color="processing">{personalInfo.role_name || "—"}</Tag>
+                  <Tag color="processing">{accountInfo?.role_name || "—"}</Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="Mô tả vai trò">
-                  <Text type="secondary">
-                    {personalInfo.role_description || "—"}
-                  </Text>
+                  <Text type="secondary">{accountInfo?.role_description || "—"}</Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Trạng thái">
-                  {statusTag}
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-          </Row>
-
-          <Divider />
-
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={14}>
-              <Descriptions
-                title="Địa chỉ"
-                column={1}
-                labelStyle={{ width: 180 }}
-              >
-                <Descriptions.Item label="Địa chỉ đầy đủ">
-                  <EnvironmentOutlined /> {fullAddress}
-                </Descriptions.Item>
-                <Descriptions.Item label="Mã địa bàn">
-                  <Row gutter={8}>
-                    <Col>
-                      <Tag>Phường: {personalInfo.ward_code || "—"}</Tag>
-                    </Col>
-                    <Col>
-                      <Tag>Quận: {personalInfo.district_code || "—"}</Tag>
-                    </Col>
-                    <Col>
-                      <Tag>TP: {personalInfo.province_code || "—"}</Tag>
-                    </Col>
-                  </Row>
-                </Descriptions.Item>
-              </Descriptions>
-            </Col>
-
-            <Col xs={24} lg={10}>
-              <Descriptions
-                title="Mốc thời gian"
-                column={1}
-                labelStyle={{ width: 160 }}
-              >
+                <Descriptions.Item label="Trạng thái">{statusTag}</Descriptions.Item>
                 <Descriptions.Item label="Đăng nhập gần nhất">
-                  <FieldTimeOutlined /> {formatDate(personalInfo.last_login)}
+                  <FieldTimeOutlined /> {fmt(accountInfo?.last_login)}
                 </Descriptions.Item>
-                <Descriptions.Item label="Ngày tạo">
-                  {formatDate(personalInfo.created_at)}
-                </Descriptions.Item>
-                <Descriptions.Item label="Cập nhật lần cuối">
-                  {formatDate(personalInfo.updated_at)}
+                <Descriptions.Item label="Ngày tạo tài khoản">
+                  {fmt(accountInfo?.created_at)}
                 </Descriptions.Item>
               </Descriptions>
             </Col>
           </Row>
         </Card>
+
+        {/* ── Card 2: Ho so cong dan (chi hien voi viewer co citizen trong Redux) ── */}
+        {citizen ? (
+          <Card>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
+              <TeamOutlined style={{ fontSize:18, color:"#1890ff" }}/>
+              <Title level={5} style={{ margin:0 }}>Hồ Sơ Công Dân</Title>
+              <Tag color="blue">Phường Phúc Lợi</Tag>
+            </div>
+
+            <Row gutter={[24, 24]}>
+              <Col xs={24} lg={12}>
+                <Descriptions title="Thông tin cơ bản" column={1} labelStyle={{ width: 180 }}>
+                  <Descriptions.Item label="Số CCCD">
+                    <Text strong><IdcardOutlined /> {citizen.citizen_code || "—"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Họ và tên">{citizen.citizen_full_name || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Ngày sinh">{fmtDate(citizen.date_of_birth)}</Descriptions.Item>
+                  <Descriptions.Item label="Giới tính">{citizen.gender || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Dân tộc">{citizen.ethnicity || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Nơi sinh">{citizen.place_of_birth || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Nghề nghiệp">{citizen.occupation || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Trạng thái cư trú">
+                    <Tag color={citizenStatusColor[citizen.citizen_status] ?? "default"}>
+                      {citizen.citizen_status || "—"}
+                    </Tag>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Col>
+
+              <Col xs={24} lg={12}>
+                <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
+                  <Descriptions.Item label="Số điện thoại">
+                    <PhoneOutlined /> {citizen.citizen_phone || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    <MailOutlined /> {citizen.citizen_email || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Địa chỉ thường trú">
+                    <EnvironmentOutlined /> {citizen.permanent_address || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Khu vực">
+                    {[citizen.citizen_ward_name, citizen.citizen_district_name, citizen.citizen_province_name]
+                      .filter(Boolean).join(", ") || "—"}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Col>
+            </Row>
+          </Card>
+        ) : (
+          // Admin / Staff hoac viewer khong co citizen
+          <Card>
+            <Result
+              icon={<TeamOutlined style={{ color:"#bbb" }}/>}
+              title="Không có hồ sơ công dân"
+              subTitle="Tài khoản này không được liên kết với công dân trong hệ thống."
+              style={{ padding:"24px 0" }}
+            />
+          </Card>
+        )}
       </div>
 
-      {/* Modal đổi mật khẩu */}
-      <Modal
-        title="🔒 Đổi mật khẩu"
-        open={showChangePassword}
+      {/* Modal doi mat khau */}
+      <Modal title="🔒 Đổi mật khẩu" open={showChangePassword}
         onCancel={() => setShowChangePassword(false)}
-        onOk={onSubmitChangePassword}
-        okText="Đổi mật khẩu"
-        cancelText="Hủy"
-        destroyOnClose
-      >
+        onOk={onChangePassword} okText="Đổi mật khẩu" cancelText="Hủy" destroyOnClose>
         <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item
-            label="Mật khẩu hiện tại"
-            name="oldPassword"
-            rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu hiện tại" },
-            ]}
-          >
-            <Input.Password placeholder="Nhập mật khẩu hiện tại" />
+          <Form.Item label="Mật khẩu hiện tại" name="oldPassword"
+            rules={[{ required:true, message:"Vui lòng nhập mật khẩu hiện tại" }]}>
+            <Input.Password placeholder="Nhập mật khẩu hiện tại"/>
           </Form.Item>
-
-          <Form.Item
-            label="Mật khẩu mới"
-            name="newPassword"
+          <Form.Item label="Mật khẩu mới" name="newPassword" hasFeedback
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu mới" },
-              { min: 6, message: "Mật khẩu mới phải có ít nhất 6 ký tự" },
-            ]}
-            hasFeedback
-          >
-            <Input.Password placeholder="Nhập mật khẩu mới (≥ 6 ký tự)" />
+              { required:true, message:"Vui lòng nhập mật khẩu mới" },
+              { min:8, message:"Mật khẩu mới phải có ít nhất 8 ký tự" },
+            ]}>
+            <Input.Password placeholder="Nhập mật khẩu mới (≥ 8 ký tự)"/>
           </Form.Item>
-
-          <Form.Item
-            label="Xác nhận mật khẩu mới"
-            name="confirmPassword"
-            dependencies={["newPassword"]}
-            hasFeedback
+          <Form.Item label="Xác nhận mật khẩu mới" name="confirmPassword"
+            dependencies={["newPassword"]} hasFeedback
             rules={[
-              { required: true, message: "Vui lòng xác nhận mật khẩu mới" },
+              { required:true, message:"Vui lòng xác nhận mật khẩu mới" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("Mật khẩu xác nhận không khớp")
-                  );
+                  if (!value || getFieldValue("newPassword") === value) return Promise.resolve();
+                  return Promise.reject(new Error("Mật khẩu xác nhận không khớp"));
                 },
               }),
-            ]}
-          >
-            <Input.Password placeholder="Nhập lại mật khẩu mới" />
+            ]}>
+            <Input.Password placeholder="Nhập lại mật khẩu mới"/>
           </Form.Item>
         </Form>
       </Modal>

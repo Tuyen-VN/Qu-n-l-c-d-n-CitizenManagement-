@@ -74,6 +74,51 @@ class AuthService {
 
       logger.info(`User ${username} logged in successfully`);
 
+      // ── Neu la viewer + so (viewer01, viewer02, ...) → lay thong tin citizen ──
+      let citizenInfo = null;
+      const viewerMatch = user.username.match(/^viewer(\d+)$/i);
+      if (viewerMatch) {
+        const citizenId = parseInt(viewerMatch[1], 10); // "01" → 1
+        try {
+          const citizenResult = await pool
+            .request()
+            .input('citizenId', sql.Int, citizenId)
+            .query(`
+              SELECT
+                c.citizen_id,
+                c.citizen_code,
+                c.full_name        AS citizen_full_name,
+                c.date_of_birth,
+                c.gender,
+                c.place_of_birth,
+                c.ethnicity,
+                c.occupation,
+                c.phone            AS citizen_phone,
+                c.email            AS citizen_email,
+                c.permanent_address,
+                c.status           AS citizen_status,
+                w.ward_name        AS citizen_ward_name,
+                d.district_name    AS citizen_district_name,
+                p.province_name    AS citizen_province_name
+              FROM Citizens c
+              LEFT JOIN Wards w    ON c.ward_id      = w.ward_id
+              LEFT JOIN Districts d ON w.district_id = d.district_id
+              LEFT JOIN Provinces p ON d.province_id = p.province_id
+              WHERE c.citizen_id = @citizenId
+            `);
+
+          if (citizenResult.recordset.length > 0) {
+            citizenInfo = citizenResult.recordset[0];
+            logger.info(`Viewer login: mapped ${user.username} → citizen_id ${citizenId}`);
+          } else {
+            logger.warn(`Viewer login: citizen_id ${citizenId} not found for ${user.username}`);
+          }
+        } catch (citizenErr) {
+          // Khong tim duoc citizen thi van cho dang nhap binh thuong
+          logger.error(`Failed to fetch citizen for viewer login:`, citizenErr);
+        }
+      }
+
       return {
         accessToken,
         refreshToken,
@@ -85,6 +130,8 @@ class AuthService {
           phone: user.phone,
           role: user.role_name,
           wardId: user.ward_id,
+          // Thong tin citizen dinh kem (null neu khong phai viewer hoac khong tim thay)
+          citizen: citizenInfo,
         },
       };
     } catch (error) {
