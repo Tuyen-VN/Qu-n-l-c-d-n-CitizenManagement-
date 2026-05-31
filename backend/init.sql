@@ -380,19 +380,19 @@ DECLARE @h_id INT;
 -- HỘ GIA ĐÌNH 1: Tổ 3 - Nhà gồm 4 thành viên
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001070005001', N'Đặng Văn Hùng', '1970-01-20', 'Male', N'Hà Nội', N'Kinh', N'Kinh doanh', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001070005001', N'Đặng Văn Hùng', '1970-01-20', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Kinh doanh', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001072005002', N'Bùi Thị Thu', '1972-03-15', 'Female', N'Hà Nội', N'Kinh', N'Nội trợ', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001072005002', N'Bùi Thị Thu', '1972-03-15', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Nội trợ', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001095005003', N'Đặng Minh Khang', '1995-07-10', 'Male', N'Hà Nội', N'Kinh', N'Sinh viên', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001095005003', N'Đặng Minh Khang', '1995-07-10', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Sinh viên', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001098005004', N'Đặng Thị Anh', '1998-11-05', 'Female', N'Hà Nội', N'Kinh', N'Nhân viên văn phòng', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001098005004', N'Đặng Thị Anh', '1998-11-05', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Nhân viên văn phòng', N'Số 50 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c4 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -400,6 +400,7 @@ VALUES (N'HK-HN-LB-003', @c1, N'Số 50 Phố Phúc Lợi, Tổ 3, Phường Ph�
 SET @h_id = SCOPE_IDENTITY();
 
 INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VALUES 
+--- (@h_id, @c1, N'Chủ hộ'), (@h_id, @c2, N'Vợ'), (@h_id, @c3, N'Con'), (@h_id, @c4, N'Con');
 (@h_id, @c1, N'Chủ hộ'), (@h_id, @c2, N'Vợ'), (@h_id, @c3, N'Con'), (@h_id, @c4, N'Con');
 
 
@@ -407,15 +408,15 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 2: Tổ 4 - Nhà gồm 3 thành viên
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001080006001', N'Hoàng Văn Nam', '1980-02-28', 'Male', N'Hải Phòng', N'Kinh', N'Kỹ sư', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
+VALUES (N'001080006001', N'Hoàng Văn Nam', '1980-02-28', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Kỹ sư', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001082006002', N'Phan Thị Mai', '1982-06-12', 'Female', N'Hà Nội', N'Kinh', N'Kế toán', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
+VALUES (N'001082006002', N'Phan Thị Mai', '1982-06-12', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Kế toán', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001105006003', N'Hoàng Gia Bảo', '2005-09-30', 'Male', N'Hà Nội', N'Kinh', N'Học sinh', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
+VALUES (N'001105006003', N'Hoàng Gia Bảo', '2005-09-30', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Học sinh', N'Số 12 Ngõ 193 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -430,15 +431,15 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 3: Tổ 1 - Nhà gồm 3 thành viên
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001065007001', N'Vũ Đình Trọng', '1965-10-10', 'Male', N'Nam Định', N'Kinh', N'Giáo viên', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001065007001', N'Vũ Đình Trọng', '1965-10-10', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Giáo viên', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001068007002', N'Lê Thị Hoa', '1968-04-22', 'Female', N'Hà Nội', N'Kinh', N'Nội trợ', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001068007002', N'Lê Thị Hoa', '1968-04-22', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Nội trợ', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001090007003', N'Vũ Anh Tuấn', '1990-12-01', 'Male', N'Hà Nội', N'Kinh', N'Bác sĩ', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001090007003', N'Vũ Anh Tuấn', '1990-12-01', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Bác sĩ', N'Số 30 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -453,11 +454,11 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 4: Tổ 2 - Nhà gồm 2 thành viên
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001078008001', N'Trần Văn Long', '1978-08-08', 'Male', N'Hà Nội', N'Kinh', N'Lái xe', N'Số 45 Ngõ 210 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001078008001', N'Trần Văn Long', '1978-08-08', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Lái xe', N'Số 45 Ngõ 210 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001080008002', N'Nguyễn Thị Kim', '1980-01-19', 'Female', N'Hà Nội', N'Kinh', N'Thợ may', N'Số 45 Ngõ 210 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001080008002', N'Nguyễn Thị Kim', '1980-01-19', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Thợ may', N'Số 45 Ngõ 210 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -472,15 +473,15 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 5: Tổ 3 - Gia đình người dân tộc thiểu số
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001085009001', N'Lý Văn Hùng', '1985-07-14', 'Male', N'Cao Bằng', N'Tày', N'Công nhân', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001085009001', N'Lý Văn Hùng', '1985-07-14', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Tày', N'Công nhân', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001088009002', N'Triệu Thị Lan', '1988-09-03', 'Female', N'Cao Bằng', N'Nùng', N'Công nhân', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001088009002', N'Triệu Thị Lan', '1988-09-03', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Nùng', N'Công nhân', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001110009003', N'Lý Gia Huy', '2010-05-20', 'Male', N'Hà Nội', N'Tày', N'Học sinh', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
+VALUES (N'001110009003', N'Lý Gia Huy', '2010-05-20', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Tày', N'Học sinh', N'Số 60 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 3, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -495,11 +496,11 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 6: Tổ 4 - Vợ chồng hưu trí
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001060010001', N'Bùi Văn Kiên', '1960-11-30', 'Male', N'Hà Nội', N'Kinh', N'Hưu trí', N'Số 22 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
+VALUES (N'001060010001', N'Bùi Văn Kiên', '1960-11-30', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Hưu trí', N'Số 22 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001062010002', N'Đỗ Thị Minh', '1962-02-17', 'Female', N'Hà Nội', N'Kinh', N'Hưu trí', N'Số 22 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
+VALUES (N'001062010002', N'Đỗ Thị Minh', '1962-02-17', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Hưu trí', N'Số 22 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 4, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -514,15 +515,15 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 7: Tổ 1 - Hộ gia đình trẻ (Có đăng ký khai sinh con)
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001092011001', N'Phạm Minh Đức', '1992-04-05', 'Male', N'Hải Dương', N'Kinh', N'Lập trình viên', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001092011001', N'Phạm Minh Đức', '1992-04-05', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Lập trình viên', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001093011002', N'Trần Thu Trang', '1993-08-16', 'Female', N'Hà Nội', N'Kinh', N'Thiết kế', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001093011002', N'Trần Thu Trang', '1993-08-16', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Thiết kế', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001117011003', N'Phạm Bảo Châu', '2017-10-25', 'Female', N'Hà Nội', N'Kinh', N'Trẻ em', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+VALUES (N'001117011003', N'Phạm Bảo Châu', '2017-10-25', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Trẻ em', N'Số 18 Ngõ 12 Phố Tình Quang, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, created_by) 
@@ -537,19 +538,19 @@ INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) VA
 -- HỘ GIA ĐÌNH 8: Tổ 2 - Hộ gia đình 3 thế hệ (4 thành viên)
 -- ------------------------------------------------------------
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001055012001', N'Nguyễn Văn An', '1955-06-20', 'Male', N'Hà Nội', N'Kinh', N'Hưu trí', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001055012001', N'Nguyễn Văn An', '1955-06-20', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Hưu trí', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c1 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001085012002', N'Nguyễn Thanh Tùng', '1985-03-12', 'Male', N'Hà Nội', N'Kinh', N'Giám đốc', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001085012002', N'Nguyễn Thanh Tùng', '1985-03-12', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Giám đốc', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c2 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001087012003', N'Võ Thị Bích', '1987-11-01', 'Female', N'Đà Nẵng', N'Kinh', N'Trưởng phòng', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001087012003', N'Võ Thị Bích', '1987-11-01', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Trưởng phòng', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c3 = SCOPE_IDENTITY();
 
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, ethnicity, occupation, permanent_address, ward_id, created_by) 
-VALUES (N'001112012004', N'Nguyễn Hoàng Anh', '2012-07-07', 'Male', N'Hà Nội', N'Kinh', N'Học sinh', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
+VALUES (N'001112012004', N'Nguyễn Hoàng Anh', '2012-07-07', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Kinh', N'Học sinh', N'Số 55 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 2, 2);
 SET @c4 = SCOPE_IDENTITY();
 
 -- Sửa lỗi cú pháp bị cắt ngắn tại đây:
@@ -574,15 +575,61 @@ DECLARE @c_id INT, @h_id INT;
 
 -- 1. Hộ Tạm trú
 INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, permanent_address, ward_id, created_by, phone, email)
-VALUES (N'001090023002', N'Nguyễn Thị Thu Hương', '1990-09-20', 'Female', N'Nghệ An', N'Quỳnh Lưu, Nghệ An', 1, 2, '0987654321', 'huong.tamtru@gmail.com');
+VALUES (N'001090023002', N'Nguyễn Thị Thu Hương', '1990-09-20', 'Female', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Số 15 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2, '0987654321', 'huong.tamtru@gmail.com');
 SET @c_id = SCOPE_IDENTITY();
 
 INSERT INTO Households (household_code, head_of_household_id, address, ward_id, household_type, created_by)
-VALUES (N'HK-TR-002', @c_id, N'Nhà trọ số 12, Phường Việt Hưng', 1, N'Tạm trú', 2);
+VALUES (N'HK-TR-002', @c_id, N'Nhà trọ số 12 Phố Phúc Lợi, Tổ 1, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, N'Tạm trú', 2);
 SET @h_id = SCOPE_IDENTITY();
 
 INSERT INTO HouseholdMembers (household_id, citizen_id, relationship_to_head) 
 VALUES (@h_id, @c_id, N'Chủ hộ tạm trú');
+GO
+
+-- ============================================================================
+-- 5B. CHÈN DỮ LIỆU MẪU CHO CÁC BẢNG KHÁC (TẠM TRÚ, TẠM VẮNG, KHAI SINH, KHAI TỬ, TOKENS, LOGS)
+-- ============================================================================
+DECLARE @c_id INT;
+
+-- 2. Đăng ký Tạm trú (TemporaryResidences) cho Nguyễn Thị Thu Hương
+SELECT @c_id = citizen_id FROM Citizens WHERE citizen_code = N'001090023002';
+INSERT INTO TemporaryResidences (citizen_id, temporary_address, ward_id, reason, start_date, end_date, created_by)
+VALUES (@c_id, N'Nhà trọ số 12 Phố Phúc Lợi, Tổ 1, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, N'Đi làm việc', '2026-01-01', '2026-12-31', 2);
+
+-- 3. Đăng ký Tạm vắng (TemporaryAbsences) cho Đặng Minh Khang
+DECLARE @citizen_khang INT;
+SELECT @citizen_khang = citizen_id FROM Citizens WHERE citizen_code = N'001095005003';
+INSERT INTO TemporaryAbsences (citizen_id, destination_address, destination_ward_code, reason, start_date, expected_return_date, created_by)
+VALUES (@citizen_khang, N'Số 90 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'PL-TO-01', N'Học tập', '2026-02-01', '2026-10-31', 2);
+
+-- 4. Giấy khai sinh (BirthCertificates) cho Phạm Bảo Châu
+DECLARE @child_id INT, @father_id INT, @mother_id INT;
+SELECT @child_id = citizen_id FROM Citizens WHERE citizen_code = N'001117011003';
+SELECT @father_id = citizen_id FROM Citizens WHERE citizen_code = N'001092011001';
+SELECT @mother_id = citizen_id FROM Citizens WHERE citizen_code = N'001093011002';
+INSERT INTO BirthCertificates (certificate_number, child_citizen_id, father_citizen_id, mother_citizen_id, birth_place, registrar_name, created_by)
+VALUES (N'KS-2017-0001', @child_id, @father_id, @mother_id, N'Trạm y tế Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Nguyễn Văn A', 2);
+
+-- 5. Giấy khai tử (DeathCertificates) cho một công dân cao tuổi mới
+DECLARE @deceased_id INT;
+INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, place_of_birth, permanent_address, ward_id, created_by)
+VALUES (N'001035001234', N'Nguyễn Văn Cụt', '1935-05-15', 'Male', N'Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Số 10 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', 1, 2);
+SET @deceased_id = SCOPE_IDENTITY();
+
+INSERT INTO DeathCertificates (certificate_number, citizen_id, date_of_death, place_of_death, cause_of_death, burial_place, registrar_name, created_by)
+VALUES (N'KT-2026-0001', @deceased_id, '2026-01-10', N'Nhà riêng, Số 10 Phố Phúc Lợi, Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Tuổi già', N'Nghĩa trang Phường Phúc Lợi, Quận Long Biên, Hà Nội', N'Nguyễn Văn A', 2);
+
+-- 6. Refresh Tokens (RefreshTokens)
+DECLARE @admin_user_id INT;
+SELECT @admin_user_id = user_id FROM Users WHERE username = N'admin';
+INSERT INTO RefreshTokens (user_id, token, expires_at)
+VALUES (@admin_user_id, N'definitely-a-valid-refresh-token-for-admin-demo-purposes', DATEADD(day, 7, GETDATE()));
+
+-- 7. Nhật ký thao tác (AuditLogs)
+DECLARE @staff_user_id INT;
+SELECT @staff_user_id = user_id FROM Users WHERE username = N'staff01';
+INSERT INTO AuditLogs (user_id, action, table_name, record_id, old_value, new_value, ip_address, user_agent)
+VALUES (@staff_user_id, N'INSERT', N'Citizens', 1, NULL, N'{"citizen_code": "001070005001", "full_name": "Đặng Văn Hùng"}', N'127.0.0.1', N'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
 GO
 
 -- ============================================================================
