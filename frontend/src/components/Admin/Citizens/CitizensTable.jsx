@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Table,
   Input,
@@ -49,8 +49,9 @@ const CitizensTable = () => {
   const [citizensData, setCitizensData] = useState([]);
   const [loadingTable, setLoadingTable] = useState(false);
 
-  // const [sortQuery, setSortQuery] = useState("");
-  // const [filter, setFilter] = useState("");
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
 
   const [citizenDetail, setCitizenDetail] = useState();
   const [isDetailCitizenOpen, setIsDetailCitizenOpen] = useState(false);
@@ -59,15 +60,15 @@ const CitizensTable = () => {
 
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
   const [citizenUpdate, setCitizenUpdate] = useState(null);
-  const fetchCitizen = async () => {
+  const fetchCitizen = useCallback(async () => {
     setLoadingTable(true);
     let query = `page=${current}&pageSize=${pageSize}`;
-    // if (filter) {
-    //   query += `${filter}`;
-    // }
-    // if (sortQuery) {
-    //   query += `&${sortQuery}`;
-    // }
+    if (statusFilter) {
+      query += `&status=${statusFilter}`;
+    }
+    if (sortField && sortOrder) {
+      query += `&sortBy=${sortField}&sortOrder=${sortOrder}`;
+    }
     if (searchTerm) {
       query += `&searchTerm=${searchTerm}`;
     }
@@ -79,12 +80,11 @@ const CitizensTable = () => {
       setCitizensData(res.data);
     }
     setLoadingTable(false);
-  };
+  }, [current, pageSize, searchTerm, statusFilter, sortField, sortOrder]);
 
   useEffect(() => {
     fetchCitizen();
-  }, [current, pageSize, searchTerm]);
-  // , sortQuery, filter
+  }, [fetchCitizen]);
 
   const handleOnChangePagi = (pagination, filters, sorter) => {
     if (
@@ -100,12 +100,35 @@ const CitizensTable = () => {
       setCurrent(+pagination.current);
       console.log(pagination.current);
     }
-    if (sorter && sorter.order) {
-      // const q =
-      //   sorter.order === "ascend"
-      //     ? `sort=${sorter.field}`
-      //     : `sort=-${sorter.field}`;
-      // if (q) setSortQuery(q);
+
+    // Handle status filter from Antd Table header
+    if (filters && filters.status) {
+      const selected = filters.status;
+      if (selected && selected.length > 0) {
+        setStatusFilter(selected.join(","));
+      } else {
+        setStatusFilter(null);
+      }
+      setCurrent(1);
+    } else {
+      setStatusFilter(null);
+    }
+
+    // Handle sorting from Antd Table header
+    if (sorter && sorter.field) {
+      setSortField(sorter.field);
+      if (sorter.order === "ascend") {
+        setSortOrder("asc");
+      } else if (sorter.order === "descend") {
+        setSortOrder("desc");
+      } else {
+        setSortField(null);
+        setSortOrder(null);
+      }
+      setCurrent(1);
+    } else {
+      setSortField(null);
+      setSortOrder(null);
     }
   };
 
@@ -173,6 +196,8 @@ const CitizensTable = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      sorter: true,
+      sortOrder: sortField === "status" ? (sortOrder === "asc" ? "ascend" : "descend") : null,
       render: (s) => (
         <Tag color={STATUS_COLORS[s] || "default"} style={{ fontWeight: 600 }}>
           {STATUS_LABELS[s] || s}
@@ -184,7 +209,7 @@ const CitizensTable = () => {
         { text: "Đã mất",         value: "Deceased" },
         { text: "Không hoạt động", value: "Inactive" },
       ],
-      onFilter: (value, record) => record.status === value,
+      filteredValue: statusFilter ? statusFilter.split(",") : null,
     },
     {
       title: "Thao tác",
@@ -202,15 +227,20 @@ const CitizensTable = () => {
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(r)}
+            disabled={r.status === "Deceased"}
           />
-          <Popconfirm
-            title="Xóa công dân"
-            description="Bạn có chắc chắn muốn xóa công dân này không?"
-            okType="danger"
-            onConfirm={() => handleDelete(r.citizen_id)}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          {r.status === "Deceased" ? (
+            <Button type="text" danger icon={<DeleteOutlined />} disabled />
+          ) : (
+            <Popconfirm
+              title="Xóa công dân"
+              description="Bạn có chắc chắn muốn xóa công dân này không?"
+              okType="danger"
+              onConfirm={() => handleDelete(r.citizen_id)}
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          )}
         </Space>
       ),
     },

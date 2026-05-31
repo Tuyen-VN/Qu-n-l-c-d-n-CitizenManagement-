@@ -1,5 +1,6 @@
 const { getConnection, sql } = require('../config/database');
 const logger = require('../utils/logger');
+const bcrypt = require('bcrypt');
 
 class CitizenService {
   /**
@@ -16,7 +17,9 @@ class CitizenService {
         gender = null,
         minAge = null,
         maxAge = null,
-        status = 'null',
+        status = null,
+        sortBy = null,
+        sortOrder = 'desc',
       } = filters;
 
       const offset = (page - 1) * pageSize;
@@ -25,7 +28,7 @@ class CitizenService {
       request.input('pageSize', sql.Int, parseInt(pageSize));
       request.input('offset', sql.Int, offset);
 
-      let whereConditions = ['c.is_active = 1'];
+      let whereConditions = ["(c.is_active = 1 OR c.status = 'Deceased')"];
 
       if (searchTerm) {
         request.input('searchTerm', sql.NVarChar, `%${searchTerm}%`);
@@ -44,12 +47,32 @@ class CitizenService {
         whereConditions.push('c.gender = @gender');
       }
 
-      if (status && status !== 'null') {
-        request.input('status', sql.NVarChar, status);
-        whereConditions.push('c.status = @status');
+      if (status && status !== 'null' && status !== 'undefined') {
+        const statusList = status.split(',').map(s => s.trim()).filter(Boolean);
+        if (statusList.length > 0) {
+          const conditions = [];
+          statusList.forEach((s, idx) => {
+            const paramName = `status_${idx}`;
+            request.input(paramName, sql.NVarChar, s);
+            conditions.push(`c.status = @${paramName}`);
+          });
+          whereConditions.push(`(${conditions.join(' OR ')})`);
+        }
       }
 
       const whereClause = whereConditions.join(' AND ');
+
+      // Build sorting
+      const allowedSortFields = {
+        full_name: 'c.full_name',
+        citizen_code: 'c.citizen_code',
+        date_of_birth: 'c.date_of_birth',
+        status: 'c.status',
+        created_at: 'c.created_at',
+      };
+
+      const sortColumn = allowedSortFields[sortBy] || 'c.created_at';
+      const sortDirection = (sortOrder?.toLowerCase() === 'asc' || sortOrder?.toLowerCase() === 'ascend') ? 'ASC' : 'DESC';
 
       // Lay tong so ban ghi
       const countQuery = `
@@ -83,7 +106,7 @@ class CitizenService {
         INNER JOIN Districts d ON w.district_id = d.district_id
         INNER JOIN Provinces p ON d.province_id = p.province_id
         WHERE ${whereClause}
-        ORDER BY c.created_at DESC
+        ORDER BY ${sortColumn} ${sortDirection}
         OFFSET @offset ROWS
         FETCH NEXT @pageSize ROWS ONLY
       `;
@@ -173,7 +196,11 @@ class CitizenService {
   /**
    * Them cong dan moi
    */
+  /**
+   * Them cong dan moi va tu dong tao tai khoan Viewer
+   */
   async createCitizen(citizenData, createdBy) {
+    let transaction;
     try {
       const pool = await getConnection();
 
@@ -186,42 +213,109 @@ class CitizenService {
         throw new Error('CCCD da ton tai trong he thong');
       }
 
-      const result = await pool
-        .request()
-        .input('citizen_code', sql.NVarChar, citizenData.citizen_code)
-        .input('full_name', sql.NVarChar, citizenData.full_name)
-        .input('date_of_birth', sql.Date, citizenData.date_of_birth)
-        .input('gender', sql.NVarChar, citizenData.gender)
-        .input('place_of_birth', sql.NVarChar, citizenData.place_of_birth || null)
-        .input('ethnicity', sql.NVarChar, citizenData.ethnicity || 'Kinh')
-        .input('occupation', sql.NVarChar, citizenData.occupation || null)
-        .input('phone', sql.NVarChar, citizenData.phone || null)
-        .input('email', sql.NVarChar, citizenData.email || null)
-        .input('permanent_address', sql.NVarChar, citizenData.permanent_address)
-        .input('ward_id', sql.Int, citizenData.ward_id)
-        .input('created_by', sql.Int, createdBy)
-        .query(`
-          INSERT INTO Citizens (
-            citizen_code, full_name, date_of_birth, gender, place_of_birth,
-            ethnicity, occupation, phone, email, permanent_address, ward_id, created_by
-          )
-          OUTPUT INSERTED.citizen_id
-          VALUES (
-            @citizen_code, @full_name, @date_of_birth, @gender, @place_of_birth,
-            @ethnicity, @occupation, @phone, @email, @permanent_address, @ward_id, @created_by
-          )
-        `);
+      // 1. KHỞI TẠO TRANSACTION (Bắt buộc để đồng bộ việc tạo Công dân + Tài khoản)
+      transaction = new sql.Transaction(pool);
+      await transaction.begin();
 
-      const citizenId = result.recordset[0].citizen_id;
+      // 2. THÊM CÔNG DÂN VÀO BẢNG CITIZENS
+      const citizenRequest = new sql.Request(transaction);
+      
+      citizenRequest.input('citizen_code', sql.NVarChar, citizenData.citizen_code);
+      citizenRequest.input('full_name', sql.NVarChar, citizenData.full_name);
+      citizenRequest.input('date_of_birth', sql.Date, citizenData.date_of_birth);
+      citizenRequest.input('gender', sql.NVarChar, citizenData.gender);
+      citizenRequest.input('place_of_birth', sql.NVarChar, citizenData.place_of_birth || null);
+      citizenRequest.input('ethnicity', sql.NVarChar, citizenData.ethnicity || 'Kinh');
+      citizenRequest.input('occupation', sql.NVarChar, citizenData.occupation || null);
+      citizenRequest.input('phone', sql.NVarChar, citizenData.phone || null);
+      citizenRequest.input('email', sql.NVarChar, citizenData.email || null);
+      citizenRequest.input('permanent_address', sql.NVarChar, citizenData.permanent_address);
+      citizenRequest.input('ward_id', sql.Int, citizenData.ward_id);
+      citizenRequest.input('created_by', sql.Int, createdBy);
+
+      const citizenResult = await citizenRequest.query(`
+        INSERT INTO Citizens (
+          citizen_code, full_name, date_of_birth, gender, place_of_birth,
+          ethnicity, occupation, phone, email, permanent_address, ward_id, created_by
+        )
+        OUTPUT INSERTED.citizen_id
+        VALUES (
+          @citizen_code, @full_name, @date_of_birth, @gender, @place_of_birth,
+          @ethnicity, @occupation, @phone, @email, @permanent_address, @ward_id, @created_by
+        )
+      `);
+
+      const citizenId = citizenResult.recordset[0].citizen_id;
       logger.info(`Citizen created: ${citizenId} by user ${createdBy}`);
 
-      return await this.getCitizenById(citizenId);
+      // 3. LẤY ROLE ID CỦA 'Viewer'
+      const roleRequest = new sql.Request(transaction);
+      const roleResult = await roleRequest.query(`SELECT role_id FROM Roles WHERE role_name = 'Viewer'`);
+      
+      if (roleResult.recordset.length === 0) {
+        throw new Error('Khong tim thay vai tro Viewer trong he thong');
+      }
+      const viewerRoleId = roleResult.recordset[0].role_id;
+
+      // 4. KIỂM TRA TRÙNG EMAIL TRONG BẢNG USERS (Nếu có)
+      if (citizenData.email) {
+        const emailCheckRequest = new sql.Request(transaction);
+        emailCheckRequest.input('email', sql.NVarChar, citizenData.email);
+        const emailCheck = await emailCheckRequest.query(`SELECT user_id FROM Users WHERE email = @email`);
+        if (emailCheck.recordset.length > 0) {
+          throw new Error('Email da duoc su dung cho mot tai khoan khac');
+        }
+      }
+
+      // 5. CẤU TẠO USERNAME VÀ HASH MẬT KHẨU
+      // PadStart giúp format: 1 -> "01", 12 -> "12"
+      const username = 'viewer' + String(citizenId).padStart(2, '0');
+      const defaultPassword = 'Viewer@123';
+      const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+      // 6. THÊM TÀI KHOẢN VÀO BẢNG USERS
+      const userRequest = new sql.Request(transaction);
+      userRequest.input('username', sql.NVarChar, username);
+      userRequest.input('password_hash', sql.NVarChar, passwordHash);
+      userRequest.input('full_name', sql.NVarChar, citizenData.full_name);
+      userRequest.input('email', sql.NVarChar, citizenData.email || null);
+      userRequest.input('phone', sql.NVarChar, citizenData.phone || null);
+      userRequest.input('role_id', sql.Int, viewerRoleId);
+      userRequest.input('ward_id', sql.Int, citizenData.ward_id);
+
+      await userRequest.query(`
+        INSERT INTO Users (
+          username, password_hash, full_name, email, phone, role_id, ward_id
+        )
+        VALUES (
+          @username, @password_hash, @full_name, @email, @phone, @role_id, @ward_id
+        )
+      `);
+
+      // 7. HOÀN TẤT TRANSACTION
+      await transaction.commit();
+      logger.info(`Auto-created Viewer account for citizen ${citizenId} - Username: ${username}`);
+
+      // 8. LẤY CHI TIẾT CÔNG DÂN VÀ ĐÍNH KÈM THÔNG TIN TÀI KHOẢN TRẢ VỀ FRONTEND
+      const newCitizen = await this.getCitizenById(citizenId);
+      
+      // Bọc thông tin trả về, giúp Frontend có thể hiển thị mật khẩu tạm thời
+      return {
+        ...newCitizen,
+        accountCreated: {
+          username: username,
+          temporaryPassword: defaultPassword
+        }
+      };
+
     } catch (error) {
-      logger.error('Create citizen failed:', error);
+      // Nếu có lỗi, Rollback để không bị tình trạng có Citizen mà không có User (hoặc ngược lại)
+      if (transaction) await transaction.rollback();
+      logger.error('Create citizen and account failed:', error);
       throw error;
     }
   }
-
+  
   /**
    * Cap nhat thong tin cong dan
    */

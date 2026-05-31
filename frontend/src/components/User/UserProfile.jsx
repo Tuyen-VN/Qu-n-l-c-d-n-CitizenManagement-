@@ -25,8 +25,31 @@ const UserProfile = () => {
   const [accountInfo, setAccountInfo]       = useState(null);
   const [form] = Form.useForm();
 
-  // Lay citizen tu Redux (duoc luu khi login)
-  const citizen = useSelector((state) => state.account.user?.citizen ?? null);
+  // Lay citizen tu Redux (duoc luu khi login) hoac fallback tu accountInfo neu co
+  const citizenFromRedux = useSelector((state) => state.account.user?.citizen ?? null);
+  const user = useSelector((state) => state.account.user);
+  const citizenFromAccountInfo = accountInfo?.citizen ?? (
+    accountInfo?.citizen_id ? {
+      citizen_id: accountInfo.citizen_id,
+      citizen_code: accountInfo.citizen_code,
+      citizen_full_name: accountInfo.citizen_full_name,
+      date_of_birth: accountInfo.date_of_birth,
+      gender: accountInfo.gender,
+      place_of_birth: accountInfo.place_of_birth,
+      ethnicity: accountInfo.ethnicity,
+      occupation: accountInfo.occupation,
+      citizen_phone: accountInfo.citizen_phone,
+      citizen_email: accountInfo.citizen_email,
+      permanent_address: accountInfo.permanent_address,
+      citizen_status: accountInfo.citizen_status,
+      citizen_ward_name: accountInfo.citizen_ward_name,
+      citizen_district_name: accountInfo.citizen_district_name,
+      citizen_province_name: accountInfo.citizen_province_name,
+    } : null
+  );
+  const citizen = citizenFromRedux || citizenFromAccountInfo;
+  const userRole = user?.role || accountInfo?.role_name || "";
+  const isAdminOrStaff = userRole === "Admin" || userRole === "ADMIN" || userRole === "Staff";
 
   useEffect(() => { getAccount(); }, []);
 
@@ -67,6 +90,33 @@ const UserProfile = () => {
     Absent:   "Vắng mặt",
   };
 
+  // Map dịch Giới tính
+  const genderLabel = {
+    Male: "Nam",
+    Female: "Nữ",
+    Other: "Khác",
+    male: "Nam",
+    female: "Nữ",
+    other: "Khác",
+  };
+
+  const formatGender = (gender) => {
+    if (!gender) return "—";
+    return genderLabel[gender] || genderLabel[gender.toLowerCase?.()] || gender;
+  };
+
+  const formatCitizenStatus = (status) => {
+    if (!status) return "—";
+    return citizenStatusLabel[status] || citizenStatusLabel[status.toLowerCase?.()] || status;
+  };
+
+  const roleMap = {
+    Admin: "Quản trị viên",
+    ADMIN: "Quản trị viên",
+    Viewer: "Người Dùng",
+    VIEWER: "Người Dùng",
+    Staff: "Nhân viên",
+  };
   const statusTag = accountInfo?.is_active
     ? <Tag icon={<CheckCircleTwoTone twoToneColor="#52c41a"/>} color="success">Hoạt động</Tag>
     : <Tag icon={<CloseCircleTwoTone  twoToneColor="#ff4d4f"/>} color="error">Không hoạt động</Tag>;
@@ -120,7 +170,7 @@ const UserProfile = () => {
             <Text type="secondary">Xem thông tin chi tiết về {accountInfo?.full_name}</Text>
           </div>
           <div className="header-actions">
-            {statusTag}
+            {isAdminOrStaff && statusTag}
             <Button type="primary" icon={<LockOutlined/>}
               onClick={() => { form.resetFields(); setShowChangePassword(true); }}>
               Đổi mật khẩu
@@ -128,7 +178,48 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* ── Card: Ho so cong dan ── */}
+        {/* ── Card 1: Thong tin tai khoan ── */}
+        <Card style={{ marginBottom: 16 }}>
+          <Row gutter={[24, 24]}>
+            <Col xs={24} lg={12}>
+              <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
+                <Descriptions.Item label="Mã người dùng">
+                  <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
+                </Descriptions.Item>
+                <Descriptions.Item label="Tên đăng nhập">
+                  <UserOutlined /> {accountInfo?.username || "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Họ và tên">{accountInfo?.full_name || "—"}</Descriptions.Item>
+                <Descriptions.Item label="Email">
+                  <MailOutlined /> {accountInfo?.email || "—"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Số điện thoại">
+                  <PhoneOutlined /> {accountInfo?.phone || "—"}
+                </Descriptions.Item>
+              </Descriptions>
+            </Col>
+
+            <Col xs={24} lg={12}>
+              <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
+                <Descriptions.Item label="Vai trò">
+                  <Tag color="processing">{roleMap[accountInfo?.role_name] || accountInfo?.role_name || "—"}</Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Mô tả vai trò">
+                  <Text type="secondary">{accountInfo?.role_description || "—"}</Text>
+                </Descriptions.Item>
+                <Descriptions.Item label="Trạng thái">{statusTag}</Descriptions.Item>
+                <Descriptions.Item label="Đăng nhập gần nhất">
+                  <FieldTimeOutlined /> {fmt(accountInfo?.last_login)}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày tạo tài khoản">
+                  {fmt(accountInfo?.created_at)}
+                </Descriptions.Item>
+              </Descriptions>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* ── Card 2: Ho so cong dan (chi hien voi viewer co citizen trong Redux) ── */}
         {citizen ? (
           <Card>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
@@ -145,45 +236,48 @@ const UserProfile = () => {
                   </Descriptions.Item>
                   <Descriptions.Item label="Họ và tên">{citizen.citizen_full_name || "—"}</Descriptions.Item>
                   <Descriptions.Item label="Ngày sinh">{fmtDate(citizen.date_of_birth)}</Descriptions.Item>
-                  <Descriptions.Item label="Giới tính">{citizen.gender || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Giới tính">{formatGender(citizen.gender)}</Descriptions.Item>
+                  
                   <Descriptions.Item label="Trạng thái cư trú">
                     <Tag color={citizenStatusColor[citizen.citizen_status] ?? "default"}>
-                      {citizenStatusLabel[citizen.citizen_status] ?? citizen.citizen_status ?? "—"}
+                      {formatCitizenStatus(citizen.citizen_status)}
                     </Tag>
                   </Descriptions.Item>
                 </Descriptions>
               </Col>
 
-              <Col xs={24} lg={12}>
-                <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
-                  <Descriptions.Item label="Số điện thoại">
-                    <PhoneOutlined /> {citizen.citizen_phone || "—"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Email">
-                    <MailOutlined /> {citizen.citizen_email || "—"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Địa chỉ thường trú">
-                    <EnvironmentOutlined /> {citizen.permanent_address || "—"}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Khu vực">
-                    {[citizen.citizen_ward_name, citizen.citizen_district_name, citizen.citizen_province_name]
-                      .filter(Boolean).join(", ") || "—"}
-                  </Descriptions.Item>
-                </Descriptions>
-              </Col>
-            </Row>
-          </Card>
-        ) : (
-          // Admin / Staff hoac viewer khong co citizen
-          <Card>
-            <Result
-              icon={<TeamOutlined style={{ color:"#bbb" }}/>}
-              title="Không có hồ sơ công dân"
-              subTitle="Tài khoản này không được liên kết với công dân trong hệ thống."
-              style={{ padding:"24px 0" }}
-            />
-          </Card>
-        )}
+                <Col xs={24} lg={12}>
+                  <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
+                    <Descriptions.Item label="Số điện thoại">
+                      <PhoneOutlined /> {citizen.citizen_phone || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Email">
+                      <MailOutlined /> {citizen.citizen_email || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ thường trú">
+                      <EnvironmentOutlined /> {citizen.permanent_address || "—"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Khu vực">
+                      {[citizen.citizen_ward_name, citizen.citizen_district_name, citizen.citizen_province_name]
+                        .filter(Boolean).join(", ") || "—"}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Col>
+              </Row>
+            </Card>
+          ) : (
+            // Admin / Staff hoac viewer khong co citizen
+            <Card>
+              <Result
+                icon={<TeamOutlined style={{ color:"#bbb" }}/>}
+                title="Không có hồ sơ công dân"
+                subTitle="Tài khoản này không được liên kết với công dân trong hệ thống."
+                style={{ padding:"24px 0" }}
+              />
+            </Card>
+          )
+        }
+
       </div>
 
       {/* Modal doi mat khau */}

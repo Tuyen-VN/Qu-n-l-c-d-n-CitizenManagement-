@@ -140,6 +140,24 @@ const queryValidation = [
     .optional()
     .isInt({ min: 1 })
     .withMessage('Ward ID khong hop le'),
+
+  query('status')
+    .optional()
+    .trim(),
+
+  query('searchTerm')
+    .optional()
+    .trim(),
+
+  query('sortBy')
+    .optional()
+    .isIn(['full_name', 'citizen_code', 'date_of_birth', 'status', 'created_at'])
+    .withMessage('Truong sap xep khong hop le'),
+
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'desc', 'ascend', 'descend'])
+    .withMessage('Thu tu sap xep khong hop le'),
 ];
 
 module.exports = {

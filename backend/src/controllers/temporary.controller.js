@@ -69,7 +69,14 @@ class TemporaryResidenceController {
       if (error.message.includes('dang co dang ky')) {
         return conflictResponse(res, error.message);
       }
-      if (error.message.includes('khong ton tai') || error.message.includes('phai') || error.message.includes('Thoi han')) {
+      if (
+        error.message.includes('khong ton tai') ||
+        error.message.includes('da mat') ||
+        error.message.includes('khong con hoat dong') ||
+        error.message.includes('khong o trang thai') ||
+        error.message.includes('phai') ||
+        error.message.includes('Thoi han')
+      ) {
         return errorResponse(res, 'INVALID_DATA', error.message, 400);
       }
       return errorResponse(res, 'CREATE_TEMP_RES_FAILED', 'Dang ky tam tru that bai', 500);
@@ -229,7 +236,13 @@ class TemporaryAbsenceController {
       if (error.message.includes('dang co dang ky')) {
         return conflictResponse(res, error.message);
       }
-      if (error.message.includes('khong ton tai') || error.message.includes('phai') || error.message.includes('Thoi han')) {
+      if (
+        error.message.includes('khong ton tai') ||
+        error.message.includes('da mat') ||
+        error.message.includes('khong con hoat dong') ||
+        error.message.includes('phai') ||
+        error.message.includes('Thoi han')
+      ) {
         return errorResponse(res, 'INVALID_DATA', error.message, 400);
       }
       return errorResponse(res, 'CREATE_TEMP_ABS_FAILED', 'Dang ky tam vang that bai', 500);

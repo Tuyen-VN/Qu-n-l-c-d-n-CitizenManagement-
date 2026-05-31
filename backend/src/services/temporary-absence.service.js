@@ -155,11 +155,14 @@ class TemporaryAbsenceService {
 
       const citizenCheck = await transaction.request()
         .input('citizenId', sql.Int, tempAbsData.citizen_id)
-        .query(`SELECT citizen_id, full_name, status, ward_id FROM Citizens WHERE citizen_id = @citizenId AND is_active = 1`);
+        .query(`SELECT citizen_id, full_name, status, ward_id, is_active FROM Citizens WHERE citizen_id = @citizenId`);
 
       if (citizenCheck.recordset.length === 0) throw new Error('Cong dan khong ton tai');
       const citizen = citizenCheck.recordset[0];
-      if (citizen.status !== 'Active') throw new Error('Cong dan phai o trang thai Active');
+
+      if (citizen.status === 'Deceased') throw new Error('Cong dan da mat, khong the dang ky tam vang');
+      if (!citizen.is_active) throw new Error('Cong dan khong con hoat dong trong he thong');
+      if (citizen.status !== 'Active') throw new Error('Cong dan phai o trang thai dang sinh song de dang ky tam vang');
 
       const activeCheck = await transaction.request()
         .input('citizenId', sql.Int, tempAbsData.citizen_id)

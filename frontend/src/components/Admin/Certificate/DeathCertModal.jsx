@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal, Form, Input, DatePicker, Select, Row, Col, message, notification } from "antd";
 import { createDeathCertificateAPI, callListCitizensAPI } from "../../../services/api.service";
+import dayjs from "dayjs";
 
 const DeathCertModal = ({ open, onClose, onCreated }) => {
   const [form] = Form.useForm();
@@ -42,8 +43,28 @@ const DeathCertModal = ({ open, onClose, onCreated }) => {
         </Form.Item>
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="date_of_death" label="Ngày mất" rules={[{ required: true }]}>
-              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+            <Form.Item
+              name="date_of_death"
+              label="Ngày mất"
+              rules={[
+                { required: true, message: "Vui lòng chọn ngày mất" },
+                {
+                  validator: (_, value) => {
+                    if (value && value.isAfter(dayjs(), "day")) {
+                      return Promise.reject(new Error("Ngày mất không thể ở tương lai"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                format="DD/MM/YYYY"
+                disabledDate={(current) =>
+                  current && current.isAfter(dayjs(), "day")
+                }
+              />
             </Form.Item>
           </Col>
           <Col span={12}>

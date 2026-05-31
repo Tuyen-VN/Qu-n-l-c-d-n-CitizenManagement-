@@ -90,12 +90,14 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
   // citizen_id yêu cầu STRING
   const citizenOptions = useMemo(
     () =>
-      citizens.map((c) => ({
-        value: String(c.citizen_id), // <-- string
-        label: `${c.citizen_code} — ${c.full_name}${
-          c.phone ? " (" + c.phone + ")" : ""
-        }`,
-      })),
+      citizens
+        .filter((c) => ["Active", "Absent"].includes(c.status))
+        .map((c) => ({
+          value: String(c.citizen_id), // <-- string
+          label: `${c.citizen_code} — ${c.full_name}${
+            c.phone ? " (" + c.phone + ")" : ""
+          }`,
+        })),
     [citizens]
   );
 
@@ -136,15 +138,22 @@ const ResidenceCreateModal = ({ open, onClose, onCreated }) => {
         onClose && onClose();
         onCreated && onCreated();
       } else {
+        const errMsg =
+          res?.error?.message ||
+          res?.message ||
+          "Đã có lỗi xảy ra, vui lòng thử lại";
         notification.error({
-          message: "Đã có lỗi xảy ra",
-          description:
-            JSON.stringify(res?.error.message) || JSON.stringify(res?.details),
+          message: "Không thể tạo tạm trú",
+          description: errMsg,
         });
       }
     } catch (e) {
       if (!e?.errorFields) {
-        message.error(e?.response?.data?.message || "Tạo tạm trú thất bại");
+        const errMsg =
+          e?.response?.data?.error?.message ||
+          e?.response?.data?.message ||
+          "Tạo tạm trú thất bại";
+        notification.error({ message: "Lỗi", description: errMsg });
       }
     } finally {
       setSubmitting(false);

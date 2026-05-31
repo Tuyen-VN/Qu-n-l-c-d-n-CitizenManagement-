@@ -217,9 +217,13 @@ class DeathCertificateService {
       }
 
       // Kiem tra ngay tu vong hop le
+      // So sanh theo ngay (bo phan gio phut giay) de ngay hom nay luon hop le
       const dateOfDeath = new Date(certData.date_of_death);
+      dateOfDeath.setHours(0, 0, 0, 0);
       const dateOfBirth = new Date(citizen.date_of_birth);
+      dateOfBirth.setHours(0, 0, 0, 0);
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
       if (dateOfDeath > today) {
         throw new Error('Ngay tu vong khong the lon hon ngay hom nay');
@@ -289,6 +293,8 @@ class DeathCertificateService {
         `);
 
       // Loai khoi ho khau (danh dau khong con la thanh vien hien tai)
+      // Sử dụng CASE WHEN để tránh vi phạm CHECK constraint (leave_date >= join_date)
+      // khi ngày mất nằm trước ngày gia nhập hộ khẩu (vấn đề do dữ liệu mẫu có join_date mặc định là ngày hôm nay)
       await transaction
         .request()
         .input('citizenId', sql.Int, certData.citizen_id)
@@ -297,7 +303,7 @@ class DeathCertificateService {
           UPDATE HouseholdMembers
           SET
             is_current_member = 0,
-            leave_date = @leaveDate,
+            leave_date = CASE WHEN @leaveDate >= join_date THEN @leaveDate ELSE join_date END,
             updated_at = GETDATE()
           WHERE citizen_id = @citizenId AND is_current_member = 1
         `);
@@ -307,8 +313,12 @@ class DeathCertificateService {
 
       
     } catch (error) {
-      await transaction.rollback();
       logger.error('Create death certificate failed:', error);
+      try {
+        await transaction.rollback();
+      } catch (rollbackError) {
+        logger.error('Rollback transaction failed:', rollbackError);
+      }
       throw error;
     }
     return await this.getDeathCertificateById(certId);
