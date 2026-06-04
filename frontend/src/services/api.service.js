@@ -83,6 +83,10 @@ const deleteCitizenAPI = (id) => {
   return res;
 };
 
+const callGetCitizenSpouseAPI = (id) => {   // ← thêm ở đây
+  return axios.get(`/api/citizens/${id}/spouse`);
+};
+
 const callListHouseholdAPI = (query) => {
   const URL_BACKEND = `api/households?${query}`;
   const res = axios.get(URL_BACKEND);
@@ -402,6 +406,7 @@ export {
   callListCitizensAPI,
   deleteCitizenAPI,
   createCitizenAPI,
+  callGetCitizenSpouseAPI,
   callListHouseholdAPI,
   deleteHouseholdAPI,
   callListWardAPI,

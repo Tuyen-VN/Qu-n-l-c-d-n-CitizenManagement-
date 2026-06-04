@@ -112,6 +112,36 @@ router.get(
 
 /**
  * @swagger
+ * /api/citizens/{id}/spouse:
+ *   get:
+ *     summary: Lay thong tin vo/chong cua cong dan (cung ho khau, gioi tinh doi lap)
+ *     tags: [Citizens]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID cong dan
+ *     responses:
+ *       200:
+ *         description: Thanh cong
+ *       404:
+ *         description: Khong tim thay vo/chong
+ */
+router.get(
+  '/:id/spouse',
+  verifyToken,
+  verifyWardAccess,
+  idParamValidation,
+  validate,
+  citizenController.getCitizenSpouse
+);
+
+/**
+ * @swagger
  * /api/citizens/{id}:
  *   get:
  *     summary: Lay thong tin chi tiet cong dan

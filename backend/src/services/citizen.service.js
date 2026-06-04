@@ -459,6 +459,54 @@ class CitizenService {
     }
   }
 
+  async getCitizenSpouse(citizenId) {
+    try {
+      const pool = await getConnection();
+ 
+      // Lấy giới tính + household của công dân này
+      const citizenResult = await pool.request()
+        .input('citizenId', sql.Int, citizenId)
+        .query(`
+          SELECT c.gender, hm.household_id
+          FROM Citizens c
+          LEFT JOIN HouseholdMembers hm ON c.citizen_id = hm.citizen_id AND hm.is_current_member = 1
+          WHERE c.citizen_id = @citizenId AND c.is_active = 1
+        `);
+ 
+      if (citizenResult.recordset.length === 0) return null;
+ 
+      const { gender, household_id } = citizenResult.recordset[0];
+      if (!household_id) return null;
+ 
+      // Giới tính đối lập
+      const spouseGender = (gender === 'Male') ? 'Female' : 'Male';
+ 
+      // Tìm người cùng hộ có giới tính đối lập
+      const spouseResult = await pool.request()
+        .input('householdId', sql.Int, household_id)
+        .input('citizenId',   sql.Int, citizenId)
+        .input('spouseGender', sql.NVarChar, spouseGender)
+        .query(`
+          SELECT TOP 1
+            c.citizen_id, c.citizen_code, c.full_name, c.gender
+          FROM HouseholdMembers hm
+          INNER JOIN Citizens c ON hm.citizen_id = c.citizen_id
+          WHERE hm.household_id   = @householdId
+            AND hm.citizen_id    != @citizenId
+            AND hm.is_current_member = 1
+            AND c.gender          = @spouseGender
+            AND c.is_active       = 1
+            AND c.status         != 'Deceased'
+        `);
+ 
+      if (spouseResult.recordset.length === 0) return null;
+      return spouseResult.recordset[0];
+ 
+    } catch (error) {
+      logger.error('Get citizen spouse failed:', error);
+      throw error;
+    }
+  }
   /**
    * Thong ke cong dan theo gioi tinh
    */

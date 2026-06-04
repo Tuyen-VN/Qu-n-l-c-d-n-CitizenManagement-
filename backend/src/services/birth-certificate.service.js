@@ -215,27 +215,45 @@ class BirthCertificateService {
         if (motherCheck.recordset[0].status === 'Deceased') throw new Error('Me da mat');
       }
 
-      // ── 4. Sinh citizen_code và INSERT bản ghi Công dân mới ───────
+      // ── 4. Lấy địa chỉ + ward từ hộ khẩu cha (ưu tiên) hoặc mẹ ──
+      const addressParentId = certData.father_citizen_id || certData.mother_citizen_id;
+      const parentInfo = await transaction.request()
+        .input('parentId', sql.Int, addressParentId)
+        .query(`
+          SELECT
+            c.ward_id,
+            ISNULL(h.address, c.permanent_address) AS permanent_address
+          FROM Citizens c
+          LEFT JOIN HouseholdMembers hm ON c.citizen_id = hm.citizen_id AND hm.is_current_member = 1
+          LEFT JOIN Households h ON hm.household_id = h.household_id
+          WHERE c.citizen_id = @parentId
+        `);
+
+      const childWardId = parentInfo.recordset[0]?.ward_id || wardId || 4;
+      const childAddress = parentInfo.recordset[0]?.permanent_address || null;
+
+      // ── 5. Sinh citizen_code và INSERT bản ghi Công dân mới ───────
       const citizenCode = await this._generateCitizenCode(transaction);
 
       const citizenInsert = await transaction.request()
-        .input('citizen_code',  sql.NVarChar, citizenCode)
-        .input('full_name',     sql.NVarChar, certData.child_full_name)
-        .input('date_of_birth', sql.Date,     certData.child_dob)
-        .input('gender',        sql.NVarChar, certData.child_gender)
-        .input('ward_id',       sql.Int,      wardId || 4)
-        .input('status',        sql.NVarChar, 'Active')
-        .input('is_active',     sql.Bit,      1)
-        .input('created_by',    sql.Int,      createdBy)
+        .input('citizen_code',       sql.NVarChar, citizenCode)
+        .input('full_name',          sql.NVarChar, certData.child_full_name)
+        .input('date_of_birth',      sql.Date,     certData.child_dob)
+        .input('gender',             sql.NVarChar, certData.child_gender)
+        .input('ward_id',            sql.Int,      childWardId)
+        .input('permanent_address',  sql.NVarChar, childAddress)
+        .input('status',             sql.NVarChar, 'Active')
+        .input('is_active',          sql.Bit,      1)
+        .input('created_by',         sql.Int,      createdBy)
         .query(`
-          INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, ward_id, status, is_active, created_by)
+          INSERT INTO Citizens (citizen_code, full_name, date_of_birth, gender, ward_id, permanent_address, status, is_active, created_by)
           OUTPUT INSERTED.citizen_id
-          VALUES (@citizen_code, @full_name, @date_of_birth, @gender, @ward_id, @status, @is_active, @created_by)
+          VALUES (@citizen_code, @full_name, @date_of_birth, @gender, @ward_id, @permanent_address, @status, @is_active, @created_by)
         `);
 
       const childCitizenId = citizenInsert.recordset[0].citizen_id;
 
-      // ── 5. Sinh certificate_number và INSERT BirthCertificates ────
+      // ── 6. Sinh certificate_number và INSERT BirthCertificates ────
       const certNumber = await this._generateCertNumber(transaction);
 
       const certInsert = await transaction.request()
@@ -259,7 +277,7 @@ class BirthCertificateService {
 
       certId = certInsert.recordset[0].birth_cert_id;
 
-      // ── 6. Tự động thêm trẻ vào hộ khẩu cha/mẹ ──────────────────
+      // ── 7. Tự động thêm trẻ vào hộ khẩu cha/mẹ ──────────────────
       const parentId = certData.father_citizen_id || certData.mother_citizen_id;
 
       const householdCheck = await transaction.request()

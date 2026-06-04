@@ -342,6 +342,21 @@ class CitizenController {
       );
     }
   }
+  async getCitizenSpouse(req, res) {
+    try {
+      const { id } = req.params;
+      const spouse = await citizenService.getCitizenSpouse(id);
+ 
+      if (!spouse) {
+        return notFoundResponse(res, 'Khong tim thay vo/chong');
+      }
+ 
+      return successResponse(res, spouse, 'Lay thong tin vo/chong thanh cong', 200);
+    } catch (error) {
+      logger.error('Get citizen spouse controller error:', error);
+      return errorResponse(res, 'GET_SPOUSE_FAILED', 'Lay thong tin vo/chong that bai', 500);
+    }
+  }
 }
 
 module.exports = new CitizenController();
