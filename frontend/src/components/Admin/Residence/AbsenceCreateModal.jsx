@@ -175,7 +175,7 @@ const AbsenceCreateModal = ({ open, onClose, onCreated }) => {
       onOk={onSubmit}
       okText="Tạo"
       confirmLoading={submitting}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

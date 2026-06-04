@@ -90,7 +90,7 @@ const HouseholdMemberAddModal = (props) => {
       cancelText="Hủy"
       confirmLoading={submitting}
       maskClosable={!submitting}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

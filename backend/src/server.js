@@ -73,10 +73,10 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-// Rate limiting
+// Rate limiting - chi ap dung cho cac route quan trong, khong ap dung auth/me
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100"),
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "500"), // Tang len 500
   message: {
     success: false,
     error: {
@@ -86,6 +86,14 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Bo qua rate limit cho cac route nay
+  skip: (req) => {
+    const skipRoutes = [
+      '/api/auth/me',
+      '/api/auth/refresh',
+    ];
+    return skipRoutes.some(route => req.path.startsWith(route));
+  },
 });
 app.use("/api", limiter);
 

@@ -127,7 +127,7 @@ const CitizenModalUpdate = (props) => {
       cancelText="Hủy"
       confirmLoading={isSubmit}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

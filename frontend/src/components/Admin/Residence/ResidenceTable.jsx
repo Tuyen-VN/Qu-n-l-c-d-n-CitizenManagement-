@@ -295,7 +295,7 @@ const ResidenceTable = () => {
             setActiveTab(key);
             setCurrent(1); // reset trang khi đổi tab
           }}
-          destroyInactiveTabPane
+          destroyOnHidden
           items={[
             {
               key: "residence",

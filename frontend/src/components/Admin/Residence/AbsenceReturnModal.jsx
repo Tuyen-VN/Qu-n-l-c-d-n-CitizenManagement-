@@ -69,7 +69,7 @@ const AbsenceReturnModal = ({ open, onClose, onSaved, absenceData }) => {
       okText="Xác nhận về"
       cancelText="Hủy"
       confirmLoading={submitting}
-      destroyOnClose
+      destroyOnHidden
     >
       <Card size="small" style={{ marginBottom: 16, backgroundColor: "#fafafa", borderRadius: 8 }}>
         <div style={{ marginBottom: 4 }}>

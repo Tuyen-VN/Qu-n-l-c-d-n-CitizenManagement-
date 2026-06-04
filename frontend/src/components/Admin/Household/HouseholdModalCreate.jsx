@@ -65,8 +65,7 @@ const HouseholdModalCreate = ({
       form.setFieldsValue({
         household_type: "Thường trú", // tiếng Việt cho dữ liệu
       });
-    } else {
-      form.resetFields();
+      
     }
   }, [isCreateOpen]);
 
@@ -125,7 +124,7 @@ const HouseholdModalCreate = ({
       cancelText="Hủy"
       confirmLoading={submitting}
       maskClosable={!submitting}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

@@ -86,48 +86,59 @@ const routes = [
 const App = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.account.isLoading);
+  const isAuthenticated = useSelector((state) => state.account.isAuthenticated);
   const router = createBrowserRouter(routes);
   const [accountUser, setAccountUser] = useState();
+
   const getAccount = async () => {
     if (
       window.location.pathname === "/login" ||
       window.location.pathname === "/register"
     )
       return;
-    const res = await callFetchAccount();
-    if (res && res?.data) {
-      const resUser = await callUserById(res.data.userId);
-      setAccountUser(resUser);
-      if (resUser) {
-        const citizenData = resUser.data.citizen_id ? {
-          citizen_id: resUser.data.citizen_id,
-          citizen_code: resUser.data.citizen_code,
-          citizen_full_name: resUser.data.citizen_full_name,
-          date_of_birth: resUser.data.date_of_birth,
-          gender: resUser.data.gender,
-          place_of_birth: resUser.data.place_of_birth,
-          ethnicity: resUser.data.ethnicity,
-          occupation: resUser.data.occupation,
-          citizen_phone: resUser.data.citizen_phone,
-          citizen_email: resUser.data.citizen_email,
-          permanent_address: resUser.data.permanent_address,
-          citizen_status: resUser.data.citizen_status,
-          citizen_ward_name: resUser.data.citizen_ward_name,
-          citizen_district_name: resUser.data.citizen_district_name,
-          citizen_province_name: resUser.data.citizen_province_name,
-        } : null;
 
-        const dataUser = {
-          email: resUser.data.email,
-          phone: resUser.data.phone,
-          fullName: resUser.data.full_name,
-          role: resUser.data.role_name,
-          userId: resUser.data.user_id,
-          username: resUser.data.username,
-          citizen: citizenData,
-        };
-        dispatch(doGetAccountAction({ user: dataUser }));
+    // Neu da authenticated roi thi khong goi lai
+    if (isAuthenticated) return;
+
+    try {
+      const res = await callFetchAccount();
+      if (res && res?.data) {
+        const resUser = await callUserById(res.data.userId);
+        setAccountUser(resUser);
+        if (resUser) {
+          const citizenData = resUser.data.citizen_id ? {
+            citizen_id: resUser.data.citizen_id,
+            citizen_code: resUser.data.citizen_code,
+            citizen_full_name: resUser.data.citizen_full_name,
+            date_of_birth: resUser.data.date_of_birth,
+            gender: resUser.data.gender,
+            place_of_birth: resUser.data.place_of_birth,
+            ethnicity: resUser.data.ethnicity,
+            occupation: resUser.data.occupation,
+            citizen_phone: resUser.data.citizen_phone,
+            citizen_email: resUser.data.citizen_email,
+            permanent_address: resUser.data.permanent_address,
+            citizen_status: resUser.data.citizen_status,
+            citizen_ward_name: resUser.data.citizen_ward_name,
+            citizen_district_name: resUser.data.citizen_district_name,
+            citizen_province_name: resUser.data.citizen_province_name,
+          } : null;
+
+          const dataUser = {
+            email: resUser.data.email,
+            phone: resUser.data.phone,
+            fullName: resUser.data.full_name,
+            role: resUser.data.role_name,
+            userId: resUser.data.user_id,
+            username: resUser.data.username,
+            citizen: citizenData,
+          };
+          dispatch(doGetAccountAction({ user: dataUser }));
+        }
       }
+    } catch (error) {
+      // 429 hoac loi khac - khong retry tu dong
+      console.error("Get account error:", error?.response?.status, error?.message);
     }
   };
 

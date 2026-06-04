@@ -182,7 +182,7 @@ const UserProfile = () => {
         <Card style={{ marginBottom: 16 }}>
           <Row gutter={[24, 24]}>
             <Col xs={24} lg={12}>
-              <Descriptions title="Thông tin tài khoản" column={1} labelStyle={{ width: 180 }}>
+              <Descriptions title="Thông tin tài khoản" column={1} styles={{ label: { width: 180 } }}>
                 <Descriptions.Item label="Mã người dùng">
                   <Text strong><IdcardOutlined /> #{accountInfo?.user_id}</Text>
                 </Descriptions.Item>
@@ -200,7 +200,7 @@ const UserProfile = () => {
             </Col>
 
             <Col xs={24} lg={12}>
-              <Descriptions title="Vai trò & Trạng thái" column={1} labelStyle={{ width: 180 }}>
+              <Descriptions title="Vai trò & Trạng thái" column={1} styles={{ label: { width: 180 } }}>
                 <Descriptions.Item label="Vai trò">
                   <Tag color="processing">{roleMap[accountInfo?.role_name] || accountInfo?.role_name || "—"}</Tag>
                 </Descriptions.Item>
@@ -230,7 +230,7 @@ const UserProfile = () => {
 
             <Row gutter={[24, 24]}>
               <Col xs={24} lg={12}>
-                <Descriptions title="Thông tin cơ bản" column={1} labelStyle={{ width: 180 }}>
+                <Descriptions title="Thông tin cơ bản" column={1} styles={{ label: { width: 180 } }}>
                   <Descriptions.Item label="Số CCCD">
                     <Text strong><IdcardOutlined /> {citizen.citizen_code || "—"}</Text>
                   </Descriptions.Item>
@@ -247,7 +247,7 @@ const UserProfile = () => {
               </Col>
 
                 <Col xs={24} lg={12}>
-                  <Descriptions title="Liên hệ & Địa chỉ" column={1} labelStyle={{ width: 180 }}>
+                  <Descriptions title="Liên hệ & Địa chỉ" column={1} styles={{ label: { width: 180 } }}>
                     <Descriptions.Item label="Số điện thoại">
                       <PhoneOutlined /> {citizen.citizen_phone || "—"}
                     </Descriptions.Item>
@@ -283,7 +283,7 @@ const UserProfile = () => {
       {/* Modal doi mat khau */}
       <Modal title="🔒 Đổi mật khẩu" open={showChangePassword}
         onCancel={() => setShowChangePassword(false)}
-        onOk={onChangePassword} okText="Đổi mật khẩu" cancelText="Hủy" destroyOnClose>
+        onOk={onChangePassword} okText="Đổi mật khẩu" cancelText="Hủy" destroyOnHidden>
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item label="Mật khẩu hiện tại" name="oldPassword"
             rules={[{ required:true, message:"Vui lòng nhập mật khẩu hiện tại" }]}>
